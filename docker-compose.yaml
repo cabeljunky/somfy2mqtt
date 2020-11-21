@@ -17,13 +17,9 @@ services:
     privileged: true
     environment:
       - TZ=Europe/Amsterdam
-      - DSMR_SERIAL=/dev/ttyUSB3
-      - DSMR_MQTT_URL=mqqt-smurf.server.dronten.red-home.nl
-      - DSMR_MQTT_PORT=1883
-      - GPIO_UP=
-      - GPIO_DOWN=
-      - GPIO_MENU=
-      - GPIO_PROG=
+      - PIGPIO_ADDR=10.0.8.2
+      - PIGPIO_PORT=8888
+      - PIGPIOD_ARGS=-e -m -a
     networks:
       - somfy
     cap_add:
@@ -36,5 +32,8 @@ services:
       - /sys:/sys
       - /srv/docker/data/somfy2mqtt/log:/opt/somfy/log
       - /srv/docker/data/somfy2mqtt/config:/opt/somfy/config
+    ports:
+     - 8880:80
+     - 8443:443
 networks:
   somfy:

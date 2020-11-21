@@ -227,7 +227,15 @@ class Shutter(MyLog):
            # print (codecs.encode(shutterId, 'hex_codec'))
            self.config.setCode(shutterId, code+1)
 
-           pi = pigpio.pi() # connect to Pi
+           if self.config.Remote_Host != None:
+             if os.environ.get('PIGPIO_ADDR') != None:
+                self.LogInfo("Connecting to : " + os.environ.get('PIGPIO_ADDR'))
+             else:
+                self.LogInfo("Connecting to localhost")
+             pi = pigpio.pi() # connect to Pi
+           else:
+             self.LogInfo("Connecting to : " + self.config.Remote_Host )
+             pi = pigpio.pi(self.config.Remote_Host)
 
            if not pi.connected:
               exit()
@@ -369,9 +377,9 @@ class operateShutters(MyLog):
             self.LogWarn("operateShutters.py is already loaded.")
             sys.exit(1)
 
-        if not self.startPIGPIO():
-            self.LogConsole("Not able to start PIGPIO")
-            sys.exit(1)
+        #if not self.startPIGPIO():
+        #    self.LogConsole("Not able to start PIGPIO")
+        #    sys.exit(1)
 
         self.shutter = Shutter(log = self.log, config = self.config)
 
@@ -409,29 +417,37 @@ class operateShutters(MyLog):
     def startPIGPIO(self):
        if sys.version_info[0] < 3:
            import commands
-           status, process = commands.getstatusoutput('sudo pidof pigpiod')
+           status, process = commands.getstatusoutput('pidof pigpiod')
            if status:  #  it wasn't running, so start it
                self.LogInfo ("pigpiod was not running")
-               commands.getstatusoutput('sudo pigpiod -l -m')  # try to  start it
+               commands.getstatusoutput('pigpiod -l -m')  # try to  start it
                time.sleep(0.5)
                # check it again
-               status, process = commands.getstatusoutput('sudo pidof pigpiod')
+               status, process = commands.getstatusoutput('pidof pigpiod')
        else:
            import subprocess
-           status, process = subprocess.getstatusoutput('sudo pidof pigpiod')
+           status, process = subprocess.getstatusoutput('pidof pigpiod')
            if status:  #  it wasn't running, so start it
                self.LogInfo ("pigpiod was not running")
-               subprocess.getstatusoutput('sudo pigpiod -l -m')  # try to  start it
+               subprocess.getstatusoutput('pigpiod -l -m')  # try to  start it
                time.sleep(0.5)
                # check it again
-               status, process = subprocess.getstatusoutput('sudo pidof pigpiod')
+               status, process = subprocess.getstatusoutput('pidof pigpiod')
 
        if not status:  # if it was started successfully (or was already running)...
            pigpiod_process = process
            self.LogInfo ("pigpiod is running, process ID is {} ".format(pigpiod_process))
 
            try:
-               pi = pigpio.pi()  # local GPIO only
+               if self.config.Remote_Host != None:
+                 if os.environ.get('PIGPIO_ADDR') != None:
+                    self.LogInfo("Connecting to : " + os.environ.get('PIGPIO_ADDR'))
+                 else:
+                    self.LogInfo("Connecting to localhost")
+                 pi = pigpio.pi() # connect to Pi
+               else:
+                 self.LogInfo("Connecting to : " + self.config.Remote_Host )
+                 pi = pigpio.pi(self.config.Remote_Host)
                self.LogInfo ("pigpio's pi instantiated")
            except Exception as e:
                start_pigpiod_exception = str(e)

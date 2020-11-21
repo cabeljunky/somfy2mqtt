@@ -16,7 +16,7 @@ RUN mkdir -p /opt/somfy && \
     mkdir -p /opt/somfy/config && \
     apt-get update && \ 
     apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y python3-pigpio pigpio-tools && \
+    apt-get install --no-install-recommends -y python3-pigpio pigpio-tools python3-paho-mqtt python3-requests python3-ephem python3-flask python3-iniparse && \
     apt-get install --no-install-recommends -y build-essential
 
 WORKDIR /opt/somfy

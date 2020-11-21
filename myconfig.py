@@ -60,6 +60,17 @@ class MyConfig (MyLog):
                 self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
                 return False
 
+        parameters = {'Remote': str, 'Remote_Port': int, 'Remote_Host': str}
+        
+        self.SetSection("Remote");
+        for key, type in parameters.items():
+            try:
+                if self.HasOption(key):
+                    setattr(self, key, self.ReadValue(key, return_type=type))
+            except Exception as e1:
+                self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
+                return False
+
         parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'EnableDiscovery': bool}
         
         self.SetSection("MQTT");
