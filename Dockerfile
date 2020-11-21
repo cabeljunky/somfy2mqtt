@@ -15,7 +15,7 @@ RUN mkdir -p /opt/somfy && \
     mkdir -p /opt/somfy/log  && \
     mkdir -p /opt/somfy/config && \
     apt-get update && \ 
-    apt-get upgrade && \
+    apt-get upgrade -y && \
     apt-get install --no-install-recommends -y python3-pigpio pigpio-tools && \
     apt-get install --no-install-recommends -y build-essential
 
