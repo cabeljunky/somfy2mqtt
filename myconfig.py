@@ -61,18 +61,18 @@ class MyConfig (MyLog):
                 self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
                 return False
 
-        parameters = {'Remote': str, 'Remote_Port': int, 'Remote_Host': str}
+        parameters = {'RemoteGPIO': str, 'Remote_Port': int, 'Remote_Host': str}
 
-        self.SetSection("Remote");
+        self.SetSection("RemoteGPIO");
         for key, type in parameters.items():
             try:
                 if self.HasOption(key):
                     setattr(self, key, self.ReadValue(key, return_type=type))
             except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
+                self.LogErrorLine("Missing config file or config file entries in Section Remote GPIO for key "+key+": " + str(e1))
                 return False
 
-        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'MQTT_ClientID': str, 'EnableDiscovery': bool}
+        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'MQTT_ClientID': str, 'MQTT_Topic': str, 'MQTT_Discover_Topic': str, 'EnableDiscovery': bool, "MQTT_CACerts": str, "MQTT_Cert": str, "MQTT_Key": str, "MQTT_AllowedCiphers": str, "MQTT_VerifyCertificate": bool}
 
         self.SetSection("MQTT");
         for key, type in parameters.items():
@@ -80,7 +80,7 @@ class MyConfig (MyLog):
                 if self.HasOption(key):
                     setattr(self, key, self.ReadValue(key, return_type=type))
             except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
+                self.LogErrorLine("Missing config file or config file entries in Section MQTT for key "+key+": " + str(e1))
                 return False
 
         self.SetSection("Shutters");

@@ -75,7 +75,7 @@ SETUP_XML ="""<?xml version=1.0?>
 # A simple utility class to wait for incoming data to be
 # ready on a socket.
 
-class poller (MyLog):
+class Poller (MyLog):
     def __init__(self, log):
         self.poller = select.poll()
         self.targets = {}
@@ -107,21 +107,21 @@ class poller (MyLog):
 # but it supports either specified or automatic IP address and port
 # selection.
 
-class upnp_device(MyLog, object):
+class UpnpDevice(MyLog, object):
     this_host_ip = None
 
     @staticmethod
     def local_ip_address():
-        if not upnp_device.this_host_ip:
+        if not UpnpDevice.this_host_ip:
             temp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             try:
                 temp_socket.connect(('8.8.8.8', 53))
-                upnp_device.this_host_ip = temp_socket.getsockname()[0]
+                UpnpDevice.this_host_ip = temp_socket.getsockname()[0]
             except:
-                upnp_device.this_host_ip = '127.0.0.1'
+                UpnpDevice.this_host_ip = '127.0.0.1'
             del(temp_socket)
             # self.LogInfo("got local address of %s" % upnp_device.this_host_ip)
-        return upnp_device.this_host_ip
+        return UpnpDevice.this_host_ip
 
 
     def __init__(self, listener, poller, port, root_url, server_version, persistent_uuid, other_headers = None, ip_address = None, log = None):
@@ -139,7 +139,7 @@ class upnp_device(MyLog, object):
         if ip_address:
             self.ip_address = ip_address
         else:
-            self.ip_address = upnp_device.local_ip_address()
+            self.ip_address = UpnpDevice.local_ip_address()
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -197,7 +197,7 @@ class upnp_device(MyLog, object):
 
 # This subclass does the bulk of the work to mimic a WeMo switch on the network.
 
-class fauxmo(upnp_device):
+class Fauxmo(UpnpDevice):
     @staticmethod
     def make_uuid(name):
         return ''.join(["%x" % sum([ord(c) for c in name])] + ["%x" % ord(c) for c in "%sfauxmo!" % name])[:14]
@@ -211,7 +211,7 @@ class fauxmo(upnp_device):
             self.log = log
         persistent_uuid = "Socket-1_0-" + self.serial
         other_headers = ['X-User-Agent: redsonic']
-        upnp_device.__init__(self, listener, poller, port, "http://%(ip_address)s:%(port)s/setup.xml", "Unspecified, UPnP/1.0, Unspecified", persistent_uuid, other_headers=other_headers, ip_address=ip_address, log=self.log)
+        UpnpDevice.__init__(self, listener, poller, port, "http://%(ip_address)s:%(port)s/setup.xml", "Unspecified, UPnP/1.0, Unspecified", persistent_uuid, other_headers=other_headers, ip_address=ip_address, log=self.log)
         if action_handler:
             self.action_handler = action_handler
         else:
@@ -331,7 +331,7 @@ class fauxmo(upnp_device):
 # support the more common root device general search. The Echo
 # doesn't search for root devices.
 
-class upnp_broadcast_responder(MyLog, object):
+class UpnpBroadcastResponder(MyLog, object):
     TIMEOUT = 0
 
     def __init__(self, log):
@@ -406,7 +406,7 @@ class upnp_broadcast_responder(MyLog, object):
         self.LogInfo("UPnP broadcast listener: new device registered")
 
 
-class debounce_handler(object):
+class DebounceHandler(object):
     """Use this handler to keep multiple Amazon Echo devices from reacting to
        the same voice command.
     """
