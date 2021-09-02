@@ -27,6 +27,7 @@ class MyConfig (MyLog):
         self.HTTPPort = 80
         self.HTTPSPort = 443
         self.RTS_Address = "0x279620"
+        self.MQTT_ClientID = "somfy-mqtt-bridge"
         self.Shutters = {}
         self.ShuttersByName = {}
         self.Schedule = {}
@@ -61,7 +62,7 @@ class MyConfig (MyLog):
                 return False
 
         parameters = {'Remote': str, 'Remote_Port': int, 'Remote_Host': str}
-        
+
         self.SetSection("Remote");
         for key, type in parameters.items():
             try:
@@ -71,8 +72,8 @@ class MyConfig (MyLog):
                 self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
                 return False
 
-        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'EnableDiscovery': bool}
-        
+        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'MQTT_ClientID': str, 'EnableDiscovery': bool}
+
         self.SetSection("MQTT");
         for key, type in parameters.items():
             try:
@@ -101,7 +102,7 @@ class MyConfig (MyLog):
             except Exception as e1:
                 self.LogErrorLine("Missing config file or config file entries in Section Shutters for key "+key+": " + str(e1))
                 return False
-                                   
+
         self.SetSection("Scheduler")
         schedules = self.GetList()
         for key, value in schedules:
@@ -112,7 +113,7 @@ class MyConfig (MyLog):
             except Exception as e1:
                 self.LogErrorLine("Missing config file or config file entries in Section Scheduler for key "+key+": " + str(e1))
                 return False
-                                   
+
         return True
 
     #---------------------MyConfig::setLocation---------------------------------
