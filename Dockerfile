@@ -13,12 +13,10 @@ RUN apt-get update && \
     make install
 
 FROM python:3-slim-bullseye
-RUN mkdir -p /opt/somfy && \
-    mkdir -p /opt/somfy/log  && \
+RUN mkdir -p /opt/somfy/log  && \
     mkdir -p /opt/somfy/config && \
     apt-get update && \ 
     apt-get install --no-install-recommends -y python3-pigpio pigpio-tools python3-paho-mqtt python3-requests python3-ephem python3-flask python3-iniparse && \
-    apt-get install --no-install-recommends -y build-essential && \
     apt-get clean
 
 WORKDIR /opt/somfy

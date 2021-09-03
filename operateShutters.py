@@ -89,19 +89,15 @@ class Shutter(MyLog):
         state = self.getShutterState(shutterId)
         oldLastCommandTime = state.lastCommandTime
 
-        self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Waiting for operation to complete for " + str(
-            timeToWait) + " seconds")
+        self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Waiting for operation to complete for " + str(timeToWait) + " seconds")
         time.sleep(timeToWait)
 
         # Only set new position if registerCommand has not been called in between
         if state.lastCommandTime == oldLastCommandTime:
-            self.LogDebug(
-                "[" + self.config.Shutters[shutterId]['name'] + "] Set new final position: " + str(newPosition))
+            self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Set new final position: " + str(newPosition))
             self.setPosition(shutterId, newPosition)
         else:
-            self.LogDebug(
-                "[" + self.config.Shutters[shutterId]['name'] + "] Discard final position. Position is now: " + str(
-                    state.position))
+            self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Discard final position. Position is now: " + str( state.position))
 
     def lower(self, shutterId):
         state = self.getShutterState(shutterId, 100)
@@ -167,9 +163,7 @@ class Shutter(MyLog):
         fallback = False
         if secondsSinceLastCommand > 0 and secondsSinceLastCommand < setupDuration:
             durationPercentage = int(round(secondsSinceLastCommand / setupDuration * 100))
-            self.LogDebug(
-                "[" + shutterId + "] Duration percentage: " + str(durationPercentage) + ", State position: " + str(
-                    state.position))
+            self.LogDebug("[" + shutterId + "] Duration percentage: " + str(durationPercentage) + ", State position: " + str(state.position))
             if state.lastCommandDirection == 'up':
                 if state.position > 0:  # after rise from previous position
                     newPosition = min(100, state.position + durationPercentage)
@@ -193,17 +187,14 @@ class Shutter(MyLog):
                 self.LogInfo("[" + shutterId + "] Stay stationary.")
                 newPosition = state.position
             else:
-                self.LogInfo(
-                    "[" + shutterId + "] Motor expected to move to intermediate position " + str(intermediatePosition))
+                self.LogInfo("[" + shutterId + "] Motor expected to move to intermediate position " + str(intermediatePosition))
                 if state.position > intermediatePosition:
                     state.registerCommand('down')
                 else:
                     state.registerCommand('up')
                 # wait and set final intermediate position only if not interrupted in between
-                timeToWait = abs(state.position - intermediatePosition) / 100 * self.config.Shutters[shutterId][
-                    'duration']
-                t = threading.Thread(target=self.waitAndSetFinalPosition,
-                                     args=(shutterId, timeToWait, intermediatePosition))
+                timeToWait = abs(state.position - intermediatePosition) / 100 * self.config.Shutters[shutterId]['duration']
+                t = threading.Thread(target=self.waitAndSetFinalPosition, args=(shutterId, timeToWait, intermediatePosition))
                 t.start()
                 return
 
@@ -360,8 +351,7 @@ class operateShutters(MyLog):
         self.console = SetupLogger("shutters_console", log_file="", stream=True)
 
         if os.geteuid() != 0:
-            self.LogConsole(
-                "You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'.")
+            self.LogConsole("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'.")
             sys.exit(1)
 
         if not os.path.isfile(self.ConfigFile):
