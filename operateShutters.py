@@ -418,8 +418,8 @@ class operateShutters(MyLog):
     # --------------------- operateShutters::startPIGPIO ------------------------------
     def startPIGPIO(self):
         pigpio_args = "-l -a"
-        pigpio_port = ""
-        pigpio_host = 8888
+        pigpio_host = ""
+        pigpio_port = 8888
 
         if os.environ.get('PIGPIOD_ARGS') is not None:
             self.LogInfo("Using the following PiGPIO args to start: " + os.environ.get('PIGPIOD_ARGS'))
@@ -478,7 +478,7 @@ class operateShutters(MyLog):
                     pi = pigpio.pi()
                 else:
                     self.LogInfo("Connecting to : " + pigpio_host + ":" + pigpio_port)
-                    pi = pigpio.pi(self.pigpio_host, pigpio_port)
+                    pi = pigpio.pi(pigpio_host, pigpio_port)
                 self.LogInfo("pigpio's pi instantiated")
             except Exception as e:
                 start_pigpiod_exception = str(e)
