@@ -439,9 +439,9 @@ class operateShutters(MyLog):
             pigpio_port = self.config.PiGPIPort
 
         if self.config.PiGPIHost is not None:
-            if os.environ.get('PIGPIO_HOST') is not None:
-                self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIOD_HOST'))
-                pigpio_host = os.environ.get('PIGPIOD_HOST')
+            if os.environ.get('PIGPIO_ADDR') is not None:
+                self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIOD_ADDR'))
+                pigpio_host = os.environ.get('PIGPIOD_ADDR')
             else:
                 self.LogInfo("Using the following PiGPIO host to start: 8888")
                 pigpio_host = ""
