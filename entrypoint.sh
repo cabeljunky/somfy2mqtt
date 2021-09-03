@@ -2,9 +2,9 @@
 
 set -e
 
-: "${PIGPIO_ARGS:-}"
-: "${PIGPIO_ADDR:-}"
-: "${PIGPIO_PORT:-}"
+: "${PIGPIOD_ARGS:-}"
+: "${PIGPIOD_HOST:-}"
+: "${PIGPIOD_PORT:-}"
 
 #while true; do
 #  sleep 100
