@@ -35,7 +35,7 @@ class MyConfig (MyLog):
         self.Schedule = {}
         self.Password = ""
 
-        self.MQTT_CACerts = ""
+        self.MQTT_CA = ""
         self.MQTT_Cert = ""
         self.MQTT_Key = ""
         self.MQTT_AllowedCiphers = ""
