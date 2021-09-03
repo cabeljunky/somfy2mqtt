@@ -143,7 +143,7 @@ class MQTT(threading.Thread, MyLog):
             self.client.username_pw_set(username=self.config.MQTT_User, password=self.config.MQTT_Password)
         # set the ssl options
 
-        if not ((self.config.MQTT_Cert.strip() == "") and (self.config.MQTT_Key.strip() == "")):
+        if not ((self.config.MQTT_Cert.strip() == "") and not (self.config.MQTT_Key.strip() == "")):
             self.client.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert, keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
             self.client.tls_insecure_set(self.config.MQTT_VerifyCertificate)
 
