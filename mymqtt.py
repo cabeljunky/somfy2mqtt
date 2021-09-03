@@ -125,7 +125,7 @@ class MQTT(threading.Thread, MyLog):
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
             self.LogInfo("Subscribe to shutter: " + shutter)
             self.client.subscribe(self.config.MQTT_Topic + "/" + shutterId + "/level/cmd")
-        if self.config.EnableDiscovery == True:
+        if self.config.EnableDiscovery:
             self.LogInfo("Sending Home Assistant MQTT Discovery messages")
             self.sendStartupInfo()
 
@@ -142,9 +142,11 @@ class MQTT(threading.Thread, MyLog):
         if not (self.config.MQTT_Password.strip() == ""):
             self.client.username_pw_set(username=self.config.MQTT_User, password=self.config.MQTT_Password)
         # set the ssl options
-        if not ((self.config.MQTT_Cert.strip() == "") and (self.config.MQTT_Key.strip() == "")):
-            self.client.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert, keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
-            self.client.tls_insecure_set(self.config.MQTT_VerifyCertificate)
+
+        if self.config.MQTT_Cert is None and self.config.MQTT_Key is not None:
+            if not ((self.config.MQTT_Cert.strip() == "") and (self.config.MQTT_Key.strip() == "")):
+                self.client.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert, keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
+                self.client.tls_insecure_set(self.config.MQTT_VerifyCertificate)
 
         self.client.on_connect = self.on_connect
         self.client.on_message = self.receiveMessageFromMQTT
@@ -157,7 +159,7 @@ class MQTT(threading.Thread, MyLog):
             try:
                 self.LogInfo("Connecting to MQTT server")
                 self.client.connect(self.config.MQTT_Server, self.config.MQTT_Port)
-                if self.config.EnableDiscovery == True:
+                if self.config.EnableDiscovery:
                     self.sendStartupInfo()
                 break
             except Exception as e:

@@ -10,4 +10,4 @@ set -e
 #  sleep 100
 #done
 
-/usr/bin/python3 /opt/somfy/operateShutters.py -c /opt/somfy/config/operateShutters.conf
+/usr/bin/python3 /opt/somfy/operateShutters.py -config /opt/somfy/config/operateShutters.conf -auto -mqtt
