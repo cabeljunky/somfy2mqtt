@@ -421,16 +421,16 @@ class operateShutters(MyLog):
         pigpio_host = ""
         pigpio_port = 8888
 
-        if os.environ.get('PIGPIOD_ARGS') is not None:
-            self.LogInfo("Using the following PiGPIO args to start: " + os.environ.get('PIGPIOD_ARGS'))
-            pigpio_args = os.environ.get('PIGPIOD_ARGS')
+        if os.environ.get('PIGPIO_ARGS') is not None:
+            self.LogInfo("Using the following PiGPIO args to start: " + os.environ.get('PIGPIO_ARGS'))
+            pigpio_args = os.environ.get('PIGPIO_ARGS')
         else:
             self.LogInfo("Using the following PiGPIO args to start: '-l -a'")
 
         if self.config.PiGPIPort is not None:
             if os.environ.get('PIGPIO_PORT') is not None:
-                self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIOD_PORT'))
-                pigpio_port = os.environ.get('PIGPIOD_PORT')
+                self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
+                pigpio_port = os.environ.get('PIGPIO_PORT')
             else:
                 self.LogInfo("Using the following PiGPIO port to start: 8888")
                 pigpio_port = 8888
@@ -440,8 +440,8 @@ class operateShutters(MyLog):
 
         if self.config.PiGPIHost is not None:
             if os.environ.get('PIGPIO_ADDR') is not None:
-                self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIOD_ADDR'))
-                pigpio_host = os.environ.get('PIGPIOD_ADDR')
+                self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
+                pigpio_host = os.environ.get('PIGPIO_ADDR')
             else:
                 self.LogInfo("Using the following PiGPIO host to start: 8888")
                 pigpio_host = ""
