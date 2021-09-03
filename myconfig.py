@@ -13,6 +13,8 @@ class MyConfig (MyLog):
     def __init__(self, filename = None, section = None, log = None):
 
         super(MyLog, self).__init__()
+        self.PiGPIOHost = ""
+        self.PiGPIPort = 8888
         self.log = log
         self.FileName = filename
         self.Section = section
@@ -27,7 +29,7 @@ class MyConfig (MyLog):
         self.HTTPPort = 80
         self.HTTPSPort = 443
         self.RTS_Address = "0x279620"
-        self.MQTT_ClientID = "somfy-mqtt-bridge"
+        self.MQTT_ClientID = "somfy2mqtt"
         self.Shutters = {}
         self.ShuttersByName = {}
         self.Schedule = {}
@@ -61,9 +63,9 @@ class MyConfig (MyLog):
                 self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
                 return False
 
-        parameters = {'RemoteGPIO': str, 'Remote_Port': int, 'Remote_Host': str}
+        parameters = {'PiGPIOPort': int, 'PiGPIOHost': str}
 
-        self.SetSection("RemoteGPIO");
+        self.SetSection("PiGPIO");
         for key, type in parameters.items():
             try:
                 if self.HasOption(key):

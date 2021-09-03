@@ -417,12 +417,44 @@ class operateShutters(MyLog):
 
     # --------------------- operateShutters::startPIGPIO ------------------------------
     def startPIGPIO(self):
+        pigpio_args = "-l -a"
+        pigpio_port = ""
+        pigpio_host = 8888
+
+        if os.environ.get('PIGPIOD_ARGS') is not None:
+            self.LogInfo("Using the following PiGPIO args to start: " + os.environ.get('PIGPIOD_ARGS'))
+            pigpio_args = os.environ.get('PIGPIOD_ARGS')
+        else:
+            self.LogInfo("Using the following PiGPIO args to start: '-l -a'")
+
+        if self.config.PiGPIPort is not None:
+            if os.environ.get('PIGPIO_PORT') is not None:
+                self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIOD_PORT'))
+                pigpio_port = os.environ.get('PIGPIOD_PORT')
+            else:
+                self.LogInfo("Using the following PiGPIO port to start: 8888")
+                pigpio_port = 8888
+        else:
+            self.LogInfo("Using the following PiGPIO port to start: " + self.config.PiGPIPort)
+            pigpio_port = self.config.PiGPIPort
+
+        if self.config.PiGPIHost is not None:
+            if os.environ.get('PIGPIO_HOST') is not None:
+                self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIOD_HOST'))
+                pigpio_host = os.environ.get('PIGPIOD_HOST')
+            else:
+                self.LogInfo("Using the following PiGPIO host to start: 8888")
+                pigpio_host = ""
+        else:
+            self.LogInfo("Using the following PiGPIO host to start: " + self.config.PiGPIHost)
+            pigpio_host = self.config.PiGPIHost
+
         if sys.version_info[0] < 3:
             import commands
             status, process = commands.getstatusoutput('pidof pigpiod')
             if status:  # it wasn't running, so start it
                 self.LogInfo("pigpiod was not running")
-                commands.getstatusoutput('pigpiod -l -m')  # try to  start it
+                commands.getstatusoutput('pigpiod ' + pigpio_args)  # try to  start it
                 time.sleep(0.5)
                 # check it again
                 status, process = commands.getstatusoutput('pidof pigpiod')
@@ -431,7 +463,7 @@ class operateShutters(MyLog):
             status, process = subprocess.getstatusoutput('pidof pigpiod')
             if status:  # it wasn't running, so start it
                 self.LogInfo("pigpiod was not running")
-                subprocess.getstatusoutput('pigpiod -l -m')  # try to  start it
+                subprocess.getstatusoutput('pigpiod ' + pigpio_args)  # try to  start it
                 time.sleep(0.5)
                 # check it again
                 status, process = subprocess.getstatusoutput('pidof pigpiod')
@@ -441,15 +473,12 @@ class operateShutters(MyLog):
             self.LogInfo("pigpiod is running, process ID is {} ".format(pigpiod_process))
 
             try:
-                if self.config.Remote_Host != None:
-                    if os.environ.get('PIGPIO_ADDR') != None:
-                        self.LogInfo("Connecting to : " + os.environ.get('PIGPIO_ADDR'))
-                    else:
-                        self.LogInfo("Connecting to localhost")
-                    pi = pigpio.pi()  # connect to Pi
+                if pigpio_host == "":
+                    self.LogInfo("Connecting to localhost")
+                    pi = pigpio.pi()
                 else:
-                    self.LogInfo("Connecting to : " + self.config.Remote_Host)
-                    pi = pigpio.pi(self.config.Remote_Host)
+                    self.LogInfo("Connecting to : " + pigpio_host + ":" + pigpio_port)
+                    pi = pigpio.pi(self.pigpio_host, pigpio_port)
                 self.LogInfo("pigpio's pi instantiated")
             except Exception as e:
                 start_pigpiod_exception = str(e)
