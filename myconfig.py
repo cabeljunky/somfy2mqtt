@@ -35,6 +35,12 @@ class MyConfig (MyLog):
         self.Schedule = {}
         self.Password = ""
 
+        self.MQTT_CACerts = ""
+        self.MQTT_Cert = ""
+        self.MQTT_Key = ""
+        self.MQTT_AllowedCiphers = ""
+        self.MQTT_VerifyCertificate = ""
+
         try:
             self.config = RawConfigParser()
             self.config.read(self.FileName)
