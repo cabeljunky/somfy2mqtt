@@ -43,7 +43,7 @@ class DiscoveryMsg:
                                 }
                      }
 
-    def __init__(self, shutter, shutter_id, topic="somfy2mqtt"):
+    def __init__(self, shutter, shutter_id, topic):
         self.discovery_msg = deepcopy(DiscoveryMsg.DISCOVERY_MSG)
         self.discovery_msg["name"] = shutter
         self.discovery_msg["command_topic"] = DiscoveryMsg.DISCOVERY_MSG["command_topic"] % topic % shutter_id
@@ -66,11 +66,11 @@ class MQTT(threading.Thread, MyLog):
         self.client = ()
         self.args = args
         self.kwargs = kwargs
-        if kwargs["log"] != None:
+        if kwargs["log"] is not None:
             self.log = kwargs["log"]
-        if kwargs["shutter"] != None:
+        if kwargs["shutter"] is not None:
             self.shutter = kwargs["shutter"]
-        if kwargs["config"] != None:
+        if kwargs["config"] is not None:
             self.config = kwargs["config"]
 
         return
@@ -89,7 +89,7 @@ class MQTT(threading.Thread, MyLog):
                 return
 
             [prefix, shutterId, property, command] = topic.split("/")
-            if (command == "cmd"):
+            if command == "cmd":
                 self.LogInfo("sending message: " + str(msg))
                 if msg == "STOP":
                     self.shutter.stop(shutterId)
@@ -117,7 +117,8 @@ class MQTT(threading.Thread, MyLog):
 
     def sendStartupInfo(self):
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
-            self.sendMQTT( str(self.config.MQTT_DiscoveryTopic) + "/cover/" + shutterId + "/config", str(DiscoveryMsg(shutter, shutterId, str(self.config.MQTT_Topic))))
+            self.LogInfo("Registration of component " + shutterId + " " + str(self.config.MQTT_DiscoveryTopic) + " " + str(self.config.MQTT_Topic) )
+            self.sendMQTT(str(self.config.MQTT_DiscoveryTopic) + "/cover/" + shutterId + "/config", str(DiscoveryMsg(shutter, shutterId, str(self.config.MQTT_Topic))))
 
     def on_connect(self, client, userdata, flags, rc):
         self.LogInfo("Connected to MQTT with result code " + str(rc))
@@ -145,7 +146,9 @@ class MQTT(threading.Thread, MyLog):
 
         if not ((self.config.MQTT_Cert.strip() == "") and (self.config.MQTT_Key.strip() == "")):
             self.LogInfo("Enabling the MQTT SSL/TLS")
-            self.client.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert, keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
+            self.client.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert,
+                                keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED,
+                                tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
             self.client.tls_insecure_set(self.config.MQTT_VerifyCertificate)
 
         self.client.on_connect = self.on_connect
