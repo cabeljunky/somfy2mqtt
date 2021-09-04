@@ -117,8 +117,7 @@ class MQTT(threading.Thread, MyLog):
 
     def sendStartupInfo(self):
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
-            self.sendMQTT(self.config.MQTT_Discover_Topic + "/cover/" + shutterId + "/config",
-                          str(DiscoveryMsg(shutter, shutterId, self.config.MQTT_Discover_Topic)))
+            self.sendMQTT(self.config.MQTT_Discover_Topic + "/cover/" + shutterId + "/config", str(DiscoveryMsg(shutter, shutterId, self.config.MQTT_Discover_Topic)))
 
     def on_connect(self, client, userdata, flags, rc):
         self.LogInfo("Connected to MQTT with result code " + str(rc))
@@ -140,10 +139,12 @@ class MQTT(threading.Thread, MyLog):
         self.client = paho.Client(client_id=self.config.MQTT_ClientID)
         # set username and password
         if not (self.config.MQTT_Password.strip() == ""):
+            self.LogInfo("MQTT - Using username and password for authentication")
             self.client.username_pw_set(username=self.config.MQTT_User, password=self.config.MQTT_Password)
         # set the ssl options
 
         if not ((self.config.MQTT_Cert.strip() == "") and not (self.config.MQTT_Key.strip() == "")):
+            self.LogInfo("MQTT - Enabling the MQTT SSL/TLS")
             self.client.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert, keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
             self.client.tls_insecure_set(self.config.MQTT_VerifyCertificate)
 

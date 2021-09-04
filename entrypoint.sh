@@ -3,11 +3,12 @@
 set -e
 
 : "${PIGPIOD_ARGS:-}"
-: "${PIGPIOD_HOST:-}"
-: "${PIGPIOD_PORT:-}"
+: "${PIGPIO_HOST:-}"
+: "${PIGPIO_PORT:-}"
+: "${CONFIG:-"/opt/somfy/config/operateShutters.conf"}"
 
 #while true; do
 #  sleep 100
 #done
 
-/usr/bin/python3 /opt/somfy/operateShutters.py -config /opt/somfy/config/operateShutters.conf -auto -mqtt
+/usr/bin/python3 /opt/somfy/operateShutters.py -auto -mqtt -config "${CONFIG}"

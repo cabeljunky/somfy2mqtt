@@ -29,7 +29,6 @@ class MyConfig (MyLog):
         self.HTTPPort = 80
         self.HTTPSPort = 443
         self.RTS_Address = "0x279620"
-        self.MQTT_ClientID = "somfy2mqtt"
         self.Shutters = {}
         self.ShuttersByName = {}
         self.Schedule = {}
@@ -38,8 +37,11 @@ class MyConfig (MyLog):
         self.MQTT_CA = ""
         self.MQTT_Cert = ""
         self.MQTT_Key = ""
+        self.MQTT_ClientID = "somfy2mqtt"
         self.MQTT_AllowedCiphers = ""
         self.MQTT_VerifyCertificate = ""
+        self.MQTT_Topic = "somfy2mqtt"
+        self.MQTT_Discover_Topic = "homeassistant"
 
         try:
             self.config = RawConfigParser()
