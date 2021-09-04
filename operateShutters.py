@@ -89,15 +89,19 @@ class Shutter(MyLog):
         state = self.getShutterState(shutterId)
         oldLastCommandTime = state.lastCommandTime
 
-        self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Waiting for operation to complete for " + str(timeToWait) + " seconds")
+        self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Waiting for operation to complete for " + str(
+            timeToWait) + " seconds")
         time.sleep(timeToWait)
 
         # Only set new position if registerCommand has not been called in between
         if state.lastCommandTime == oldLastCommandTime:
-            self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Set new final position: " + str(newPosition))
+            self.LogDebug(
+                "[" + self.config.Shutters[shutterId]['name'] + "] Set new final position: " + str(newPosition))
             self.setPosition(shutterId, newPosition)
         else:
-            self.LogDebug("[" + self.config.Shutters[shutterId]['name'] + "] Discard final position. Position is now: " + str( state.position))
+            self.LogDebug(
+                "[" + self.config.Shutters[shutterId]['name'] + "] Discard final position. Position is now: " + str(
+                    state.position))
 
     def lower(self, shutterId):
         state = self.getShutterState(shutterId, 100)
@@ -163,7 +167,9 @@ class Shutter(MyLog):
         fallback = False
         if secondsSinceLastCommand > 0 and secondsSinceLastCommand < setupDuration:
             durationPercentage = int(round(secondsSinceLastCommand / setupDuration * 100))
-            self.LogDebug("[" + shutterId + "] Duration percentage: " + str(durationPercentage) + ", State position: " + str(state.position))
+            self.LogDebug(
+                "[" + shutterId + "] Duration percentage: " + str(durationPercentage) + ", State position: " + str(
+                    state.position))
             if state.lastCommandDirection == 'up':
                 if state.position > 0:  # after rise from previous position
                     newPosition = min(100, state.position + durationPercentage)
@@ -187,14 +193,17 @@ class Shutter(MyLog):
                 self.LogInfo("[" + shutterId + "] Stay stationary.")
                 newPosition = state.position
             else:
-                self.LogInfo("[" + shutterId + "] Motor expected to move to intermediate position " + str(intermediatePosition))
+                self.LogInfo(
+                    "[" + shutterId + "] Motor expected to move to intermediate position " + str(intermediatePosition))
                 if state.position > intermediatePosition:
                     state.registerCommand('down')
                 else:
                     state.registerCommand('up')
                 # wait and set final intermediate position only if not interrupted in between
-                timeToWait = abs(state.position - intermediatePosition) / 100 * self.config.Shutters[shutterId]['duration']
-                t = threading.Thread(target=self.waitAndSetFinalPosition, args=(shutterId, timeToWait, intermediatePosition))
+                timeToWait = abs(state.position - intermediatePosition) / 100 * self.config.Shutters[shutterId][
+                    'duration']
+                t = threading.Thread(target=self.waitAndSetFinalPosition,
+                                     args=(shutterId, timeToWait, intermediatePosition))
                 t.start()
                 return
 
@@ -211,6 +220,8 @@ class Shutter(MyLog):
         self.callback.append(callbackFunction)
 
     def sendCommand(self, shutterId, button, repetition):  # Sending a frame
+        pigpio_port = 8888
+        pigpio_host = ""
         # Sending more than two repetitions after the original frame means a button kept pressed and moves the blind in steps
         # to adjust the tilt. Sending the original frame and three repetitions is the smallest adjustment, sending the original
         # frame and more repetitions moves the blinds up/down for a longer time.
@@ -228,15 +239,34 @@ class Shutter(MyLog):
             # print (codecs.encode(shutterId, 'hex_codec'))
             self.config.setCode(shutterId, code + 1)
 
-            if self.config.Remote_Host != None:
-                if os.environ.get('PIGPIO_ADDR') != None:
-                    self.LogInfo("Connecting to : " + os.environ.get('PIGPIO_ADDR'))
+            if self.config.PiGPIPort is not None:
+                if os.environ.get('PIGPIO_PORT') is not None:
+                    self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
+                    pigpio_port = os.environ.get('PIGPIO_PORT')
                 else:
-                    self.LogInfo("Connecting to localhost")
+                    self.LogInfo("Using the following PiGPIO port to start: 8888")
+                    pigpio_port = 8888
+            else:
+                self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIPort))
+                pigpio_port = self.config.PiGPIPort
+
+            if self.config.PiGPIHost is not None:
+                if os.environ.get('PIGPIO_ADDR') is not None:
+                    self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
+                    pigpio_host = os.environ.get('PIGPIO_ADDR')
+                else:
+                    self.LogInfo("Using the following PiGPIO host to start: 8888")
+                    pigpio_host = ""
+            else:
+                self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIHost))
+                pigpio_host = self.config.PiGPIHost
+
+            if pigpio_host == "":
+                self.LogInfo("Connecting to localhost")
                 pi = pigpio.pi()  # connect to Pi
             else:
-                self.LogInfo("Connecting to : " + self.config.Remote_Host)
-                pi = pigpio.pi(self.config.Remote_Host)
+                self.LogInfo("Connecting to : " + pigpio_host + ":" + pigpio_port)
+                pi = pigpio.pi(pigpio_host, pigpio_port)
 
             if not pi.connected:
                 exit()
@@ -351,7 +381,8 @@ class operateShutters(MyLog):
         self.console = SetupLogger("shutters_console", log_file="", stream=True)
 
         if os.geteuid() != 0:
-            self.LogConsole("You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'.")
+            self.LogConsole(
+                "You need to have root privileges to run this script.\nPlease try again, this time using 'sudo'.")
             sys.exit(1)
 
         if not os.path.isfile(self.ConfigFile):
@@ -435,7 +466,7 @@ class operateShutters(MyLog):
                 self.LogInfo("Using the following PiGPIO port to start: 8888")
                 pigpio_port = 8888
         else:
-            self.LogInfo("Using the following PiGPIO port to start: " + self.config.PiGPIPort)
+            self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIPort))
             pigpio_port = self.config.PiGPIPort
 
         if self.config.PiGPIHost is not None:
@@ -446,7 +477,7 @@ class operateShutters(MyLog):
                 self.LogInfo("Using the following PiGPIO host to start: 8888")
                 pigpio_host = ""
         else:
-            self.LogInfo("Using the following PiGPIO host to start: " + self.config.PiGPIHost)
+            self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIHost))
             pigpio_host = self.config.PiGPIHost
 
         if sys.version_info[0] < 3:
@@ -505,8 +536,10 @@ class operateShutters(MyLog):
             self.LogInfo("rise shutter for 7 seconds")
             self.shutter.risePartial(self.config.ShuttersByName[args.shutterName], 7)
         elif ((args.shutterName != "") and (args.duskdawn is not None)):
-            self.schedule.addRepeatEventBySunrise([self.config.ShuttersByName[args.shutterName]], 'up', args.duskdawn[1], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
-            self.schedule.addRepeatEventBySunset([self.config.ShuttersByName[args.shutterName]], 'down', args.duskdawn[0], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+            self.schedule.addRepeatEventBySunrise([self.config.ShuttersByName[args.shutterName]], 'up',
+                                                  args.duskdawn[1], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+            self.schedule.addRepeatEventBySunset([self.config.ShuttersByName[args.shutterName]], 'down',
+                                                 args.duskdawn[0], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
             self.scheduler = Scheduler(
                 kwargs={'log': self.log, 'schedule': self.schedule, 'shutter': self.shutter, 'config': self.config})
             self.scheduler.setDaemon(True)
@@ -530,7 +563,10 @@ class operateShutters(MyLog):
             if (args.mqtt == True):
                 self.mqtt.setDaemon(True)
                 self.mqtt.start()
-            self.webServer = FlaskAppWrapper(name='WebServer', static_url_path=os.path.dirname(os.path.realpath(__file__)) + '/html', log=self.log, shutter=self.shutter, schedule=self.schedule, config=self.config)
+            self.webServer = FlaskAppWrapper(name='WebServer',
+                                             static_url_path=os.path.dirname(os.path.realpath(__file__)) + '/html',
+                                             log=self.log, shutter=self.shutter, schedule=self.schedule,
+                                             config=self.config)
             self.webServer.run()
         else:
             parser.print_help()
@@ -591,14 +627,19 @@ class operateShutters(MyLog):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='operate Somfy Shutters.')
     parser.add_argument('shutterName', nargs='?', help='Name of the Shutter')
-    parser.add_argument('-config', '-c', dest='ConfigFile', default=os.getcwd() + '/operateShutters.conf', help='Name of the Config File (incl full Path)')
+    parser.add_argument('-config', '-c', dest='ConfigFile', default=os.getcwd() + '/operateShutters.conf',
+                        help='Name of the Config File (incl full Path)')
     parser.add_argument('-up', '-u', help='Raise the Shutter', action='store_true')
     parser.add_argument('-down', '-d', help='lower the Shutter', action='store_true')
     parser.add_argument('-stop', '-s', help='stop the Shutter', action='store_true')
     parser.add_argument('-program', '-p', help='program a new Shutter', action='store_true')
-    parser.add_argument('-demo', help='lower the Shutter, Stop after 7 second, then raise the Shutter',  action='store_true')
-    parser.add_argument('-duskdawn', '-dd', type=int, nargs=2, help='Automatically lower the shutter at sunset and rise the shutter at sunrise, provide the evening delay and morning delay in minutes each')
-    parser.add_argument('-auto', '-a', help='Run schedule based on config. Also will start up the web-server which can be used to setup the schedule. Try: https://' + socket.gethostname(), action='store_true')
+    parser.add_argument('-demo', help='lower the Shutter, Stop after 7 second, then raise the Shutter',
+                        action='store_true')
+    parser.add_argument('-duskdawn', '-dd', type=int, nargs=2,
+                        help='Automatically lower the shutter at sunset and rise the shutter at sunrise, provide the evening delay and morning delay in minutes each')
+    parser.add_argument('-auto', '-a',
+                        help='Run schedule based on config. Also will start up the web-server which can be used to setup the schedule. Try: https://' + socket.gethostname(),
+                        action='store_true')
     parser.add_argument('-echo', '-e', help='Enable Amazon Alexa (Echo) integration', action='store_true')
     parser.add_argument('-mqtt', '-m', help='Enable MQTT integration', action='store_true')
     args = parser.parse_args()
