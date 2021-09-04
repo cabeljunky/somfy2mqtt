@@ -139,7 +139,7 @@ class MQTT(threading.Thread, MyLog):
         self.client = paho.Client(client_id=self.config.MQTT_ClientID)
         # set username and password
         if not ((self.config.MQTT_User.strip() == "") and (self.config.MQTT_Password.strip() == "")):
-            self.LogInfo("Using username and password for authentication")
+            self.LogInfo("Using username '" + self.config.MQTT_User + "' and password for authentication")
             self.client.username_pw_set(username=self.config.MQTT_User, password=self.config.MQTT_Password)
         # set the ssl options
 
@@ -157,7 +157,7 @@ class MQTT(threading.Thread, MyLog):
         while not self.shutdown_flag.is_set():
             # Loop until the server is available
             try:
-                self.LogInfo("Connecting to MQTT server: " + self.config.MQTT_Server + ":" + self.config.MQTT_Port)
+                self.LogInfo("Connecting to MQTT server: " + self.config.MQTT_Server + ":" + str(self.config.MQTT_Port))
                 self.client.connect(self.config.MQTT_Server, self.config.MQTT_Port)
                 if self.config.EnableDiscovery:
                     self.sendStartupInfo()
