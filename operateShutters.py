@@ -54,12 +54,12 @@ class Shutter(MyLog):
     def __init__(self, log=None, config=None):
         super(Shutter, self).__init__()
         self.lock = threading.Lock()
-        if log != None:
+        if log is not None:
             self.log = log
-        if config != None:
+        if config is not None:
             self.config = config
 
-        if self.config.TXGPIO != None:
+        if self.config.TXGPIO is not None:
             self.TXGPIO = self.config.TXGPIO  # 433.42 MHz emitter
         else:
             self.TXGPIO = 4  # 433.42 MHz emitter on GPIO 4
@@ -165,7 +165,7 @@ class Shutter(MyLog):
         setupDuration = self.config.Shutters[shutterId]['duration']
 
         fallback = False
-        if secondsSinceLastCommand > 0 and secondsSinceLastCommand < setupDuration:
+        if 0 < secondsSinceLastCommand < setupDuration:
             durationPercentage = int(round(secondsSinceLastCommand / setupDuration * 100))
             self.LogDebug(
                 "[" + shutterId + "] Duration percentage: " + str(durationPercentage) + ", State position: " + str(
@@ -187,7 +187,7 @@ class Shutter(MyLog):
             self.LogWarn("[" + shutterId + "] Too much time since last command.")
             fallback = True
 
-        if fallback == True:  # Let's assume it will end on the intermediate position ! If it exists !
+        if fallback:  # Let's assume it will end on the intermediate position ! If it exists !
             intermediatePosition = self.config.Shutters[shutterId]['intermediatePosition']
             if (intermediatePosition == None) or (intermediatePosition == state.position):
                 self.LogInfo("[" + shutterId + "] Stay stationary.")
@@ -373,7 +373,7 @@ class operateShutters(MyLog):
         self.IsStopping = False
         self.ProgramComplete = False
 
-        if args.ConfigFile == None:
+        if args.ConfigFile is None:
             self.ConfigFile = "/etc/operateShutters.conf"
         else:
             self.ConfigFile = args.ConfigFile
@@ -424,10 +424,10 @@ class operateShutters(MyLog):
         self.scheduler = None
         self.webServer = None
 
-        if (args.echo == True):
+        if args.echo:
             self.alexa = Alexa(kwargs={'log': self.log, 'shutter': self.shutter, 'config': self.config})
 
-        if (args.mqtt == True):
+        if args.mqtt:
             self.mqtt = MQTT(kwargs={'log': self.log, 'shutter': self.shutter, 'config': self.config})
 
         self.ProcessCommand(args);
@@ -521,21 +521,21 @@ class operateShutters(MyLog):
 
     # --------------------- operateShutters::ProcessCommand -----------------------------------------------
     def ProcessCommand(self, args):
-        if ((args.shutterName != "") and (args.down == True)):
+        if (args.shutterName != "") and (args.down == True):
             self.shutter.lower(self.config.ShuttersByName[args.shutterName])
-        elif ((args.shutterName != "") and (args.up == True)):
+        elif (args.shutterName != "") and (args.up == True):
             self.shutter.rise(self.config.ShuttersByName[args.shutterName])
-        elif ((args.shutterName != "") and (args.stop == True)):
+        elif (args.shutterName != "") and (args.stop == True):
             self.shutter.stop(self.config.ShuttersByName[args.shutterName])
-        elif ((args.shutterName != "") and (args.program == True)):
+        elif (args.shutterName != "") and (args.program == True):
             self.shutter.program(self.config.ShuttersByName[args.shutterName])
-        elif ((args.shutterName != "") and (args.demo == True)):
+        elif (args.shutterName != "") and (args.demo == True):
             self.LogInfo("lowering shutter for 7 seconds")
             self.shutter.lowerPartial(self.config.ShuttersByName[args.shutterName], 7)
             time.sleep(7)
             self.LogInfo("rise shutter for 7 seconds")
             self.shutter.risePartial(self.config.ShuttersByName[args.shutterName], 7)
-        elif ((args.shutterName != "") and (args.duskdawn is not None)):
+        elif (args.shutterName != "") and (args.duskdawn is not None):
             self.schedule.addRepeatEventBySunrise([self.config.ShuttersByName[args.shutterName]], 'up',
                                                   args.duskdawn[1], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
             self.schedule.addRepeatEventBySunset([self.config.ShuttersByName[args.shutterName]], 'down',
@@ -544,23 +544,23 @@ class operateShutters(MyLog):
                 kwargs={'log': self.log, 'schedule': self.schedule, 'shutter': self.shutter, 'config': self.config})
             self.scheduler.setDaemon(True)
             self.scheduler.start()
-            if (args.echo == True):
+            if args.echo:
                 self.alexa.setDaemon(True)
                 self.alexa.start()
-            if (args.mqtt == True):
+            if args.mqtt:
                 self.mqtt.setDaemon(True)
                 self.mqtt.start()
             self.scheduler.join()
-        elif (args.auto == True):
+        elif args.auto:
             self.schedule.loadScheudleFromConfig()
             self.scheduler = Scheduler(
                 kwargs={'log': self.log, 'schedule': self.schedule, 'shutter': self.shutter, 'config': self.config})
             self.scheduler.setDaemon(True)
             self.scheduler.start()
-            if (args.echo == True):
+            if args.echo:
                 self.alexa.setDaemon(True)
                 self.alexa.start()
-            if (args.mqtt == True):
+            if args.mqtt:
                 self.mqtt.setDaemon(True)
                 self.mqtt.start()
             self.webServer = FlaskAppWrapper(name='WebServer',
@@ -571,16 +571,16 @@ class operateShutters(MyLog):
         else:
             parser.print_help()
 
-        if (args.echo == True):
+        if args.echo:
             self.alexa.setDaemon(True)
             self.alexa.start()
-        if (args.mqtt == True):
+        if args.mqtt:
             self.mqtt.setDaemon(True)
             self.mqtt.start()
 
-        if (args.echo == True):
+        if args.echo:
             self.alexa.join()
-        if (args.mqtt == True):
+        if args.mqtt:
             self.mqtt.join()
         self.LogInfo("Process Command Completed....")
         self.Close();
@@ -598,22 +598,22 @@ class operateShutters(MyLog):
 
         try:
             self.ProgramComplete = True
-            if (not self.scheduler == None):
+            if self.scheduler is not None:
                 self.LogError("Stopping Scheduler. This can take up to 1 second...")
                 self.scheduler.shutdown_flag.set()
                 self.scheduler.join()
                 self.LogError("Scheduler stopped. Now exiting.")
-            if (not self.alexa == None):
+            if self.alexa is not None:
                 self.LogError("Stopping Alexa Listener. This can take up to 1 second...")
                 self.alexa.shutdown_flag.set()
                 self.alexa.join()
                 self.LogError("Alexa Listener stopped. Now exiting.")
-            if (not self.mqtt == None):
+            if self.mqtt is not None:
                 self.LogError("Stopping MQTT Listener. This can take up to 1 second...")
                 self.mqtt.shutdown_flag.set()
                 self.mqtt.join()
                 self.LogError("MQTT Listener stopped. Now exiting.")
-            if (not self.webServer == None):
+            if self.webServer is not None:
                 self.LogError("Stopping WebServer. This can take up to 1 second...")
                 self.webServer.shutdown_server()
                 self.LogError("WebServer stopped. Now exiting.")
