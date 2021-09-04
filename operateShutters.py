@@ -239,7 +239,7 @@ class Shutter(MyLog):
             # print (codecs.encode(shutterId, 'hex_codec'))
             self.config.setCode(shutterId, code + 1)
 
-            if self.config.PiGPIPort is not None:
+            if self.config.PiGPIOPort is not None:
                 if os.environ.get('PIGPIO_PORT') is not None:
                     self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
                     pigpio_port = os.environ.get('PIGPIO_PORT')
@@ -247,10 +247,10 @@ class Shutter(MyLog):
                     self.LogInfo("Using the following PiGPIO port to start: 8888")
                     pigpio_port = 8888
             else:
-                self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIPort))
-                pigpio_port = self.config.PiGPIPort
+                self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIOPort))
+                pigpio_port = self.config.PiGPIOPort
 
-            if self.config.PiGPIHost is not None:
+            if self.config.PiGPIOHost is not None:
                 if os.environ.get('PIGPIO_ADDR') is not None:
                     self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
                     pigpio_host = os.environ.get('PIGPIO_ADDR')
@@ -258,8 +258,8 @@ class Shutter(MyLog):
                     self.LogInfo("Using the following PiGPIO host to start: 8888")
                     pigpio_host = ""
             else:
-                self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIHost))
-                pigpio_host = self.config.PiGPIHost
+                self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIOHost))
+                pigpio_host = self.config.PiGPIOHost
 
             if pigpio_host == "":
                 self.LogInfo("Connecting to localhost")
@@ -458,7 +458,7 @@ class operateShutters(MyLog):
         else:
             self.LogInfo("Using the following PiGPIO args to start: '-l -a'")
 
-        if self.config.PiGPIPort is not None:
+        if self.config.PiGPIOPort is not None:
             if os.environ.get('PIGPIO_PORT') is not None:
                 self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
                 pigpio_port = os.environ.get('PIGPIO_PORT')
@@ -466,10 +466,10 @@ class operateShutters(MyLog):
                 self.LogInfo("Using the following PiGPIO port to start: 8888")
                 pigpio_port = 8888
         else:
-            self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIPort))
-            pigpio_port = self.config.PiGPIPort
+            self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIOPort))
+            pigpio_port = self.config.PiGPIOPort
 
-        if self.config.PiGPIHost is not None:
+        if self.config.PiGPIOHost is not None:
             if os.environ.get('PIGPIO_ADDR') is not None:
                 self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
                 pigpio_host = os.environ.get('PIGPIO_ADDR')
@@ -477,8 +477,8 @@ class operateShutters(MyLog):
                 self.LogInfo("Using the following PiGPIO host to start: 8888")
                 pigpio_host = ""
         else:
-            self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIHost))
-            pigpio_host = self.config.PiGPIHost
+            self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIOHost))
+            pigpio_host = self.config.PiGPIOHost
 
         if sys.version_info[0] < 3:
             import commands

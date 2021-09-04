@@ -14,7 +14,7 @@ class MyConfig (MyLog):
 
         super(MyLog, self).__init__()
         self.PiGPIOHost = ""
-        self.PiGPIPort = 8888
+        self.PiGPIOPort = 8888
         self.log = log
         self.FileName = filename
         self.Section = section
