@@ -46,9 +46,9 @@ class DiscoveryMsg:
     def __init__(self, shutter, shutter_id, topic):
         self.discovery_msg = deepcopy(DiscoveryMsg.DISCOVERY_MSG)
         self.discovery_msg["name"] = shutter
-        self.discovery_msg["command_topic"] = DiscoveryMsg.DISCOVERY_MSG["command_topic"] % topic % shutter_id
-        self.discovery_msg["position_topic"] = DiscoveryMsg.DISCOVERY_MSG["position_topic"] % topic % shutter_id
-        self.discovery_msg["set_position_topic"] = DiscoveryMsg.DISCOVERY_MSG["set_position_topic"] % topic % shutter_id
+        self.discovery_msg["command_topic"] = DiscoveryMsg.DISCOVERY_MSG["command_topic"] % (topic, shutter_id)
+        self.discovery_msg["position_topic"] = DiscoveryMsg.DISCOVERY_MSG["position_topic"] % (topic, shutter_id)
+        self.discovery_msg["set_position_topic"] = DiscoveryMsg.DISCOVERY_MSG["set_position_topic"] % (topic, shutter_id)
         self.discovery_msg["unique_id"] = shutter_id
         self.discovery_msg["device"]["name"] = shutter
         self.discovery_msg["device"]["identifiers"] = shutter_id
