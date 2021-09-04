@@ -38,12 +38,12 @@ class DiscoveryMsg:
                      "unique_id": "",
                      "device": {"name": "",
                                 "model": "somfy2mqtt controlled shutter",
-                                "manufacturer": "Nickduino",
+                                "manufacturer": "Somfy",
                                 "identifiers": ""
                                 }
                      }
 
-    def __init__(self, shutter, shutter_id, topic):
+    def __init__(self, shutter, shutter_id, topic="somfy2mqtt"):
         self.discovery_msg = deepcopy(DiscoveryMsg.DISCOVERY_MSG)
         self.discovery_msg["name"] = shutter
         self.discovery_msg["command_topic"] = DiscoveryMsg.DISCOVERY_MSG["command_topic"] % topic % shutter_id
@@ -123,14 +123,14 @@ class MQTT(threading.Thread, MyLog):
         self.LogInfo("Connected to MQTT with result code " + str(rc))
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
             self.LogInfo("Subscribe to shutter: " + shutter)
-            self.client.subscribe(self.config.MQTT_Topic + "/" + shutterId + "/level/cmd")
+            self.client.subscribe(str(self.config.MQTT_Topic) + "/" + shutterId + "/level/cmd")
         if self.config.EnableDiscovery:
             self.LogInfo("Sending Home Assistant MQTT Discovery messages")
             self.sendStartupInfo()
 
     def set_state(self, shutterId, level):
         self.LogInfo("Received request to set Shutter " + shutterId + " to " + str(level))
-        self.sendMQTT(self.config.MQTT_Topic + "/" + shutterId + "/level/set_state", str(level))
+        self.sendMQTT(str(self.config.MQTT_Topic) + "/" + shutterId + "/level/set_state", str(level))
 
     def run(self):
         self.LogInfo("Entering MQTT polling loop")
