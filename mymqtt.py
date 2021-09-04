@@ -83,7 +83,7 @@ class MQTT(threading.Thread, MyLog):
             self.LogInfo("message received from MQTT: " + topic + " = " + msg)
 
             data = topic.split("/")
-            if data[0] == self.config.MQTT_Discover_Topic and data[1] == "status":
+            if data[0] == str(self.config.MQTT_DiscoveryTopic) and data[1] == "status":
                 if msg == "online":
                     self.sendStartupInfo()
                 return
@@ -117,7 +117,7 @@ class MQTT(threading.Thread, MyLog):
 
     def sendStartupInfo(self):
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
-            self.sendMQTT(self.config.MQTT_Discover_Topic + "/cover/" + shutterId + "/config", str(DiscoveryMsg(shutter, shutterId, self.config.MQTT_Discover_Topic)))
+            self.sendMQTT( str(self.config.MQTT_DiscoveryTopic) + "/cover/" + shutterId + "/config", str(DiscoveryMsg(shutter, shutterId, str(self.config.MQTT_Topic))))
 
     def on_connect(self, client, userdata, flags, rc):
         self.LogInfo("Connected to MQTT with result code " + str(rc))

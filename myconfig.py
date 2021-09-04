@@ -41,7 +41,7 @@ class MyConfig (MyLog):
         self.MQTT_AllowedCiphers = ""
         self.MQTT_VerifyCertificate = ""
         self.MQTT_Topic = "somfy2mqtt"
-        self.MQTT_Discover_Topic = "homeassistant"
+        self.MQTT_DiscoveryTopic = "homeassistant"
 
         try:
             self.config = RawConfigParser()
@@ -82,7 +82,7 @@ class MyConfig (MyLog):
                 self.LogErrorLine("Missing config file or config file entries in Section Remote GPIO for key "+key+": " + str(e1))
                 return False
 
-        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'MQTT_ClientID': str, 'MQTT_Topic': str, 'MQTT_Discover_Topic': str, 'EnableDiscovery': bool, "MQTT_CACerts": str, "MQTT_Cert": str, "MQTT_Key": str, "MQTT_AllowedCiphers": str, "MQTT_VerifyCertificate": bool}
+        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'MQTT_ClientID': str, 'MQTT_Topic': str, 'MQTT_DiscoveryTopic': str, 'EnableDiscovery': bool, "MQTT_CACerts": str, "MQTT_Cert": str, "MQTT_Key": str, "MQTT_AllowedCiphers": str, "MQTT_VerifyCertificate": bool}
 
         self.SetSection("MQTT");
         for key, type in parameters.items():
