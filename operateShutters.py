@@ -241,24 +241,24 @@ class Shutter(MyLog):
 
             if self.config.PiGPIOPort is not None:
                 if os.environ.get('PIGPIO_PORT') is not None:
-                    self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
+                    self.LogInfo("Using the following env PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
                     pigpio_port = os.environ.get('PIGPIO_PORT')
                 else:
-                    self.LogInfo("Using the following PiGPIO port to start: 8888")
+                    self.LogInfo("Using the default PiGPIO port to start: 8888")
                     pigpio_port = 8888
             else:
-                self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIOPort))
+                self.LogInfo("Using the following config PiGPIO port to start: " + str(self.config.PiGPIOPort))
                 pigpio_port = self.config.PiGPIOPort
 
             if self.config.PiGPIOHost is not None:
                 if os.environ.get('PIGPIO_ADDR') is not None:
-                    self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
+                    self.LogInfo("Using the following env PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
                     pigpio_host = os.environ.get('PIGPIO_ADDR')
                 else:
-                    self.LogInfo("Using the following PiGPIO host to start: 8888")
+                    self.LogInfo("Using the following default PiGPIO host to start: ''")
                     pigpio_host = ""
             else:
-                self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIOHost))
+                self.LogInfo("Using the following config PiGPIO host to start: " + str(self.config.PiGPIOHost))
                 pigpio_host = self.config.PiGPIOHost
 
             if pigpio_host == "":
@@ -453,31 +453,31 @@ class operateShutters(MyLog):
         pigpio_port = 8888
 
         if os.environ.get('PIGPIO_ARGS') is not None:
-            self.LogInfo("Using the following PiGPIO args to start: " + os.environ.get('PIGPIO_ARGS'))
+            self.LogInfo("Using the following env PiGPIO args to start: " + os.environ.get('PIGPIO_ARGS'))
             pigpio_args = os.environ.get('PIGPIO_ARGS')
         else:
             self.LogInfo("Using the following PiGPIO args to start: '-l -a'")
 
         if self.config.PiGPIOPort is not None:
             if os.environ.get('PIGPIO_PORT') is not None:
-                self.LogInfo("Using the following PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
+                self.LogInfo("Using the following env PiGPIO port to start: " + os.environ.get('PIGPIO_PORT'))
                 pigpio_port = os.environ.get('PIGPIO_PORT')
             else:
-                self.LogInfo("Using the following PiGPIO port to start: 8888")
+                self.LogInfo("Using the following default PiGPIO port to start: 8888")
                 pigpio_port = 8888
         else:
-            self.LogInfo("Using the following PiGPIO port to start: " + str(self.config.PiGPIOPort))
+            self.LogInfo("Using the following config PiGPIO port to start: " + str(self.config.PiGPIOPort))
             pigpio_port = self.config.PiGPIOPort
 
         if self.config.PiGPIOHost is not None:
             if os.environ.get('PIGPIO_ADDR') is not None:
-                self.LogInfo("Using the following PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
+                self.LogInfo("Using the following env PiGPIO host to start: " + os.environ.get('PIGPIO_ADDR'))
                 pigpio_host = os.environ.get('PIGPIO_ADDR')
             else:
-                self.LogInfo("Using the following PiGPIO host to start: 8888")
+                self.LogInfo("Using the following defaultPiGPIO host to start: ''")
                 pigpio_host = ""
         else:
-            self.LogInfo("Using the following PiGPIO host to start: " + str(self.config.PiGPIOHost))
+            self.LogInfo("Using the following config PiGPIO host to start: " + str(self.config.PiGPIOHost))
             pigpio_host = self.config.PiGPIOHost
 
         if sys.version_info[0] < 3:
