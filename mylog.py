@@ -47,7 +47,7 @@ class MyLog(object):
         if self.log is not None:
             self.log.debug(msg)
 
-        self.LogConsole("DEBUG: " + msg)
+        self.LogConsole(str("DEBUG: " + msg))
 
     # --------------------------------------------------------------------------
     def LogInfo(self, Message, LogLine=False):
@@ -59,7 +59,7 @@ class MyLog(object):
         if self.log is not None:
             self.log.info(msg)
 
-        self.LogConsole("INFO: " + msg)
+        self.LogConsole(str("INFO: " + msg))
 
     # ---------------------------------------------------------------------------
     def LogWarn(self, Message, LogLine=False):
@@ -71,7 +71,7 @@ class MyLog(object):
         if self.log is not None:
             self.log.warn(msg)
 
-        self.LogConsole("WARING: " + msg)
+        self.LogConsole(str("WARING: " + msg))
 
     # ---------------------MyLog::LogConsole------------------------------------
     def LogConsole(self, Message):
