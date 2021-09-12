@@ -42,36 +42,36 @@ class MyLog(object):
         msg: string = ""
 
         if LogLine:
-            msg = Message + " : " + self.GetErrorLine()
+            msg = str("%s : %d" % (Message, self.GetErrorLine()))
 
         if self.log is not None:
             self.log.debug(msg)
 
-        self.LogConsole(str("DEBUG: " + msg))
+        self.LogConsole(str("DEBUG: %s" % msg))
 
     # --------------------------------------------------------------------------
     def LogInfo(self, Message, LogLine=False):
         msg: string = ""
 
         if LogLine:
-            msg = Message + " : " + self.GetErrorLine()
+            msg = str("%s : %d" % (Message, self.GetErrorLine()))
 
         if self.log is not None:
             self.log.info(msg)
 
-        self.LogConsole(str("INFO: " + msg))
+        self.LogConsole(str("INFO: %s" % msg))
 
     # ---------------------------------------------------------------------------
     def LogWarn(self, Message, LogLine=False):
         msg: string = ""
 
         if LogLine:
-            msg = Message + " : " + self.GetErrorLine()
+            msg = str("%s : %d" % (Message, self.GetErrorLine()))
 
         if self.log is not None:
             self.log.warn(msg)
 
-        self.LogConsole(str("WARING: " + msg))
+        self.LogConsole(str("WARING: %s" % msg))
 
     # ---------------------MyLog::LogConsole------------------------------------
     def LogConsole(self, Message):
@@ -87,16 +87,16 @@ class MyLog(object):
 
     # ---------------------MyLog::FatalError----------------------------------
     def FatalError(self, Message):
-        self.LogConsole("FATAL: " + Message)
+        self.LogConsole(str("FATAL: %s" % Message))
         if self.log is not None:
             self.log.critical("FATAL: " + Message)
         raise Exception(Message)
 
     # ---------------------MyLog::LogErrorLine--------------------------------
     def LogErrorLine(self, Message):
-        self.LogConsole("ERROR: " + Message + " : " + self.GetErrorLine())
+        self.LogConsole("ERROR: %s : %d" % (Message, self.GetErrorLine()))
         if self.log is not None:
-            self.log.error(Message + " : " + self.GetErrorLine())
+            self.log.error("%s : %d" % (Message, self.GetErrorLine()))
 
     # ---------------------MyLog::GetErrorLine--------------------------------
     def GetErrorLine(self):
