@@ -2,8 +2,10 @@
 import os, sys, time, json
 import logging, logging.handlers
 
-
 # ---------- SetupLogger --------------------------------------------------------
+import string
+
+
 def SetupLogger(logger_name, log_file, level=logging.DEBUG, stream=False):
     logger = logging.getLogger(logger_name)
 
@@ -37,50 +39,63 @@ class MyLog(object):
 
     # --------------------------------------------------------------------------
     def LogDebug(self, Message, LogLine=False):
+        msg: string = ""
 
-        if ((not LogLine) and (not self.log == None)):
-            self.log.debug(Message)
-        elif (not self.log == None):
-            self.log.debug(Message + " : " + self.GetErrorLine())
-        # self.LogConsole(Message)
+        if LogLine:
+            msg = Message + " : " + self.GetErrorLine()
+
+        if self.log is not None:
+            self.log.debug(msg)
+
+        self.LogConsole("DEBUG: " + msg)
 
     # --------------------------------------------------------------------------
     def LogInfo(self, Message, LogLine=False):
+        msg: string = ""
 
-        if ((not LogLine) and (not self.log == None)):
-            self.log.info(Message)
-        elif (not self.log == None):
-            self.log.info(Message + " : " + self.GetErrorLine())
-        # self.LogConsole(Message)
+        if LogLine:
+            msg = Message + " : " + self.GetErrorLine()
+
+        if self.log is not None:
+            self.log.info(msg)
+
+        self.LogConsole("INFO: " + msg)
 
     # ---------------------------------------------------------------------------
     def LogWarn(self, Message, LogLine=False):
+        msg: string = ""
 
-        if ((not LogLine) and (not self.log == None)):
-            self.log.warn(Message)
-        elif (not self.log == None):
-            self.log.warn(Message + " : " + self.GetErrorLine())
-        # self.LogConsole(Message)
+        if LogLine:
+            msg = Message + " : " + self.GetErrorLine()
+
+        if self.log is not None:
+            self.log.warn(msg)
+
+        self.LogConsole("WARING: " + msg)
 
     # ---------------------MyLog::LogConsole------------------------------------
     def LogConsole(self, Message):
-        if not self.console == None:
+        print(Message);
+        if self.log is not None:
             self.console.error(Message)
 
     # ---------------------MyLog::LogError------------------------------------
     def LogError(self, Message):
-        if (not self.log == None):
+        self.LogConsole(Message)
+        if self.log is not None:
             self.log.error(Message)
 
     # ---------------------MyLog::FatalError----------------------------------
     def FatalError(self, Message):
-        if not self.log == None:
+        self.LogConsole("FATAL: " + Message)
+        if self.log is not None:
             self.log.critical("FATAL: " + Message)
         raise Exception(Message)
 
     # ---------------------MyLog::LogErrorLine--------------------------------
     def LogErrorLine(self, Message):
-        if (not self.log == None):
+        self.LogConsole("ERROR: " + Message + " : " + self.GetErrorLine())
+        if self.log is not None:
             self.log.error(Message + " : " + self.GetErrorLine())
 
     # ---------------------MyLog::GetErrorLine--------------------------------
