@@ -43,6 +43,8 @@ class MyLog(object):
 
         if LogLine:
             msg = str("%s : %d" % (Message, self.GetErrorLine()))
+        else:
+            msg = str("%s" % Message)
 
         if self.log is not None:
             self.log.debug(msg)
@@ -55,6 +57,8 @@ class MyLog(object):
 
         if LogLine:
             msg = str("%s : %d" % (Message, self.GetErrorLine()))
+        else:
+            msg = str("%s" % Message)
 
         if self.log is not None:
             self.log.info(msg)
@@ -67,6 +71,8 @@ class MyLog(object):
 
         if LogLine:
             msg = str("%s : %d" % (Message, self.GetErrorLine()))
+        else:
+            msg = str("%s" % Message)
 
         if self.log is not None:
             self.log.warn(msg)
