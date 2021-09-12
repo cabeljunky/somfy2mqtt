@@ -76,7 +76,7 @@ class MyLog(object):
     # ---------------------MyLog::LogConsole------------------------------------
     def LogConsole(self, Message):
         print(Message);
-        if self.console is not None:
+        if not self.console == None:
             self.console(Message)
 
     # ---------------------MyLog::LogError------------------------------------
