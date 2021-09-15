@@ -83,7 +83,7 @@ class MQTT(threading.Thread, MyLog):
             self.LogInfo("message received from MQTT: " + topic + " = " + msg)
 
             data = topic.split("/")
-            if data[0] == str(self.config.MQTT_DiscoveryTopic) and data[1] == "status":
+            if data[0] == self.config.MQTT_DiscoveryTopic and data[1] == "status":
                 self.LogInfo("Home Assistant discovery service status: " + str(msg))
                 if msg == "online":
                     self.LogInfo("Reregistration of the service")
