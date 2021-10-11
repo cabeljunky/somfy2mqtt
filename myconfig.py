@@ -168,7 +168,7 @@ class MyConfig (MyLog):
 
         try:
 
-            if section != None:
+            if section is not None:
                 self.SetSection(section)
 
             if self.config.has_option(self.Section, Entry):

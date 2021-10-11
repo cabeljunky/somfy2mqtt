@@ -58,12 +58,13 @@ class DiscoveryMsg:
 
 
 class MQTT(threading.Thread, MyLog):
+    connected_flag = False
 
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None):
         threading.Thread.__init__(self, group=group, target=target, name="MQTT")
         self.shutdown_flag = threading.Event()
 
-        self.client = ()
+        self.t = ()
         self.args = args
         self.kwargs = kwargs
         if kwargs["log"] is not None:
@@ -115,7 +116,7 @@ class MQTT(threading.Thread, MyLog):
 
     def sendMQTT(self, topic, msg):
         self.LogInfo("sending message to MQTT: " + topic + " = " + msg)
-        self.client.publish(topic, msg, retain=True)
+        self.t.publish(topic, msg, retain=True)
 
     def sendStartupInfo(self):
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
@@ -123,38 +124,54 @@ class MQTT(threading.Thread, MyLog):
             self.sendMQTT(str(self.config.MQTT_DiscoveryTopic) + "/cover/" + shutterId + "/config", str(DiscoveryMsg(shutter, shutterId, str(self.config.MQTT_Topic))))
 
     def on_connect(self, client, userdata, flags, rc):
-        self.LogInfo("Connected to MQTT with result code " + str(rc))
-        for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
-            self.LogInfo("Subscribe to shutter: " + shutter)
-            self.client.subscribe(str(self.config.MQTT_Topic) + "/" + shutterId + "/level/cmd")
-        if self.config.EnableDiscovery:
-            self.LogInfo("Sending Home Assistant MQTT Discovery messages")
-            self.sendStartupInfo()
+        if rc == 0:
+            self.LogInfo("Connected to MQTT with result code " + str(rc))
+            self.connected_flag = True
+            for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
+                self.LogInfo("Subscribe to shutter: " + shutter)
+                self.t.subscribe(str(self.config.MQTT_Topic) + "/" + shutterId + "/level/cmd")
+            if self.config.EnableDiscovery:
+                self.LogInfo("Sending Home Assistant MQTT Discovery messages")
+                self.sendStartupInfo()
+        else:
+            print("Bad connection Returned code= ", rc)
+            self.connected_flag = False
+
+    def on_disconnect(self, client, userdata, rc=0):
+        if rc != 0:
+            self.LogInfo("Disconnected from MQTT Server. result code: " + str(rc))
+            self.connected_flag = False
+            while not self.connected_flag:  # wait in loop
+                self.LogInfo("Waiting 30sec for reconnect")
+                time.sleep(30)
+                self.t.connect(self.config.MQTT_Server, self.config.MQTT_Port)
 
     def set_state(self, shutterId, level):
         self.LogInfo("Received request to set Shutter " + shutterId + " to " + str(level))
         self.sendMQTT(str(self.config.MQTT_Topic) + "/" + shutterId + "/level/set_state", str(level))
 
     def run(self):
+        self.connected_flag = False
         self.LogInfo("Entering MQTT polling loop")
 
         # Setup the mqtt client
-        self.client = paho.Client(client_id=self.config.MQTT_ClientID)
+        self.t = paho.Client(client_id=self.config.MQTT_ClientID)
         # set username and password
         if not ((self.config.MQTT_User.strip() == "") and (self.config.MQTT_Password.strip() == "")):
             self.LogInfo("Using username '" + self.config.MQTT_User + "' and password for authentication")
-            self.client.username_pw_set(username=self.config.MQTT_User, password=self.config.MQTT_Password)
+            self.t.username_pw_set(username=self.config.MQTT_User, password=self.config.MQTT_Password)
         # set the ssl options
 
         if not ((self.config.MQTT_Cert.strip() == "") and (self.config.MQTT_Key.strip() == "")):
             self.LogInfo("Enabling the MQTT SSL/TLS")
-            self.client.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert,
+            self.t.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert,
                                 keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED,
                                 tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
-            self.client.tls_insecure_set(self.config.MQTT_VerifyCertificate)
+            self.t.tls_insecure_set(self.config.MQTT_VerifyCertificate)
 
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.receiveMessageFromMQTT
+        self.t.on_connect = self.on_connect
+        self.t.on_message = self.receiveMessageFromMQTT
+        self.t.on_disconnect = self.on_disconnect
         self.shutter.registerCallBack(self.set_state)
 
         # Startup the mqtt listener
@@ -163,21 +180,28 @@ class MQTT(threading.Thread, MyLog):
             # Loop until the server is available
             try:
                 self.LogInfo("Connecting to MQTT server: " + self.config.MQTT_Server + ":" + str(self.config.MQTT_Port))
-                self.client.connect(self.config.MQTT_Server, self.config.MQTT_Port)
+                self.t.connect(self.config.MQTT_Server, self.config.MQTT_Port)
+                time.sleep(10)
                 if self.config.EnableDiscovery:
                     self.sendStartupInfo()
                 break
             except Exception as e:
                 error += 1
                 self.LogInfo("Exception in MQTT connect " + str(error) + ": " + str(e.args))
-                time.sleep(10 + error * 5)  # Wait some time before re-connecting
 
         error = 0
         while not self.shutdown_flag.is_set():
             # Loop and poll for incoming requests
             try:
                 # NOTE: Timeout value must be smaller than MQTT keep_alive (which is 60s by default)
-                self.client.loop(timeout=30)
+                self.t.loop(timeout=30)
+                if not self.connected_flag:
+                    time.sleep(10)
+                    self.LogInfo("Re-Connecting to MQTT server")
+                    self.t.connect(self.config.MQTT_Server,self.config.MQTT_Port)
+                    time.sleep(10)
+                    if self.config.EnableDiscovery:
+                        self.sendStartupInfo()
             except Exception as e:
                 error += 1
                 self.LogInfo("Critical exception " + str(error) + ": " + str(e.args))
