@@ -4,3 +4,4 @@ Flask
 paho-mqtt
 pigpio
 requests
+certifi@2022.12.7
