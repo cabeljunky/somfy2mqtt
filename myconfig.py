@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import threading
+
 try:
     from ConfigParser import RawConfigParser
 except ImportError as e:
@@ -8,9 +9,10 @@ except ImportError as e:
 
 from mylog import MyLog
 
-class MyConfig (MyLog):
-    #---------------------MyConfig::__init__------------------------------------
-    def __init__(self, filename = None, section = None, log = None):
+
+class MyConfig(MyLog):
+    # ---------------------MyConfig::__init__------------------------------------
+    def __init__(self, filename=None, section=None, log=None):
 
         super(MyLog, self).__init__()
         self.PiGPIOHost = ""
@@ -18,7 +20,7 @@ class MyConfig (MyLog):
         self.log = log
         self.FileName = filename
         self.Section = section
-        self.CriticalLock = threading.Lock()        # Critical Lock (writing conf file)
+        self.CriticalLock = threading.Lock()  # Critical Lock (writing conf file)
         self.InitComplete = False
 
         self.LogLocation = "/var/log/"
@@ -60,15 +62,17 @@ class MyConfig (MyLog):
     # -------------------- MyConfig::LoadConfig-----------------------------------
     def LoadConfig(self):
 
-        parameters = {'LogLocation': str, 'Latitude': float, 'Longitude': float, 'SendRepeat': int, 'UseHttps': bool, 'HTTPPort': int, 'HTTPSPort': int, 'TXGPIO': int, 'RTS_Address': str, "Password": str}
-        
+        parameters = {'LogLocation': str, 'Latitude': float, 'Longitude': float, 'SendRepeat': int, 'UseHttps': bool,
+                      'HTTPPort': int, 'HTTPSPort': int, 'TXGPIO': int, 'RTS_Address': str, "Password": str}
+
         self.SetSection("General");
         for key, type in parameters.items():
             try:
                 if self.HasOption(key):
                     setattr(self, key, self.ReadValue(key, return_type=type))
             except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section General for key "+key+": " + str(e1))
+                self.LogErrorLine(
+                    "Missing config file or config file entries in Section General for key " + key + ": " + str(e1))
                 return False
 
         parameters = {'PiGPIOPort': int, 'PiGPIOHost': str}
@@ -79,10 +83,14 @@ class MyConfig (MyLog):
                 if self.HasOption(key):
                     setattr(self, key, self.ReadValue(key, return_type=type))
             except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section Remote GPIO for key "+key+": " + str(e1))
+                self.LogErrorLine(
+                    "Missing config file or config file entries in Section Remote GPIO for key " + key + ": " + str(e1))
                 return False
 
-        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str, 'MQTT_ClientID': str, 'MQTT_Topic': str, 'MQTT_DiscoveryTopic': str, 'EnableDiscovery': bool, "MQTT_CACerts": str, "MQTT_Cert": str, "MQTT_Key": str, "MQTT_AllowedCiphers": str, "MQTT_VerifyCertificate": bool}
+        parameters = {'MQTT_Server': str, 'MQTT_Port': int, 'MQTT_User': str, 'MQTT_Password': str,
+                      'MQTT_ClientID': str, 'MQTT_Topic': str, 'MQTT_DiscoveryTopic': str, 'EnableDiscovery': bool,
+                      "MQTT_CACerts": str, "MQTT_Cert": str, "MQTT_Key": str, "MQTT_AllowedCiphers": str,
+                      "MQTT_VerifyCertificate": bool}
 
         self.SetSection("MQTT");
         for key, type in parameters.items():
@@ -90,7 +98,8 @@ class MyConfig (MyLog):
                 if self.HasOption(key):
                     setattr(self, key, self.ReadValue(key, return_type=type))
             except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section MQTT for key "+key+": " + str(e1))
+                self.LogErrorLine(
+                    "Missing config file or config file entries in Section MQTT for key " + key + ": " + str(e1))
                 return False
 
         self.SetSection("Shutters");
@@ -99,18 +108,20 @@ class MyConfig (MyLog):
             try:
                 param1 = value.split(",")
                 if param1[1].strip().lower() == 'true':
-                   if (len(param1) < 3):
-                       param1.append("10");
-                   elif (param1[2].strip() == "") or (int(param1[2]) <= 0) or (int(param1[2]) >= 100):
-                       param1[2] = "10"
-                   param2 = int(self.ReadValue(key, section="ShutterRollingCodes",          return_type=int))
-                   param3 =     self.ReadValue(key, section="ShutterIntermediatePositions", return_type=int)
-                   if (param3 != None) and ((param3 < 0) or (param3 > 100)):
-                       param3  = None
-                   self.Shutters[key] = {'name': param1[0], 'code': param2, 'duration': int(param1[2]), 'intermediatePosition': param3}
-                   self.ShuttersByName[param1[0]] = key
+                    if (len(param1) < 3):
+                        param1.append("10");
+                    elif (param1[2].strip() == "") or (int(param1[2]) <= 0) or (int(param1[2]) >= 100):
+                        param1[2] = "10"
+                    param2 = int(self.ReadValue(key, section="ShutterRollingCodes", return_type=int))
+                    param3 = self.ReadValue(key, section="ShutterIntermediatePositions", return_type=int)
+                    if (param3 != None) and ((param3 < 0) or (param3 > 100)):
+                        param3 = None
+                    self.Shutters[key] = {'name': param1[0], 'code': param2, 'duration': int(param1[2]),
+                                          'intermediatePosition': param3}
+                    self.ShuttersByName[param1[0]] = key
             except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section Shutters for key "+key+": " + str(e1))
+                self.LogErrorLine(
+                    "Missing config file or config file entries in Section Shutters for key " + key + ": " + str(e1))
                 return False
 
         self.SetSection("Scheduler")
@@ -119,42 +130,44 @@ class MyConfig (MyLog):
             try:
                 param = value.split(",")
                 if param[0].strip().lower() in ('active', 'paused'):
-                   self.Schedule[key] = {'active': param[0], 'repeatType': param[1], 'repeatValue': param[2], 'timeType': param[3], 'timeValue': param[4], 'shutterAction': param[5], 'shutterIds': param[6]}
+                    self.Schedule[key] = {'active': param[0], 'repeatType': param[1], 'repeatValue': param[2],
+                                          'timeType': param[3], 'timeValue': param[4], 'shutterAction': param[5],
+                                          'shutterIds': param[6]}
             except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section Scheduler for key "+key+": " + str(e1))
+                self.LogErrorLine(
+                    "Missing config file or config file entries in Section Scheduler for key " + key + ": " + str(e1))
                 return False
 
         return True
 
-    #---------------------MyConfig::setLocation---------------------------------
+    # ---------------------MyConfig::setLocation---------------------------------
     def setLocation(self, lat, lng):
         self.WriteValue("Latitude", lat, section="General");
         self.WriteValue("Longitude", lng, section="General");
         self.Latitude = lat
         self.Longitude = lng
 
-    #---------------------MyConfig::setCode---------------------------------
+    # ---------------------MyConfig::setCode---------------------------------
     def setCode(self, shutterId, code):
         self.WriteValue(shutterId, str(code), section="ShutterRollingCodes");
         self.Shutters[shutterId]['code'] = code
-        
 
-    #---------------------MyConfig::HasOption-----------------------------------
+    # ---------------------MyConfig::HasOption-----------------------------------
     def HasOption(self, Entry):
 
         return self.config.has_option(self.Section, Entry)
 
-    #---------------------MyConfig::GetList-------------------------------------
+    # ---------------------MyConfig::GetList-------------------------------------
     def GetList(self):
 
         return self.config.items(self.Section)
 
-    #---------------------MyConfig::GetSections---------------------------------
+    # ---------------------MyConfig::GetSections---------------------------------
     def GetSections(self):
 
         return self.config.sections()
 
-    #---------------------MyConfig::SetSection----------------------------------
+    # ---------------------MyConfig::SetSection----------------------------------
     def SetSection(self, section):
 
         # if not (isinstance(section, str) or isinstance(section, unicode)) or not len(section):
@@ -163,8 +176,9 @@ class MyConfig (MyLog):
             return False
         self.Section = section
         return True
-    #---------------------MyConfig::ReadValue-----------------------------------
-    def ReadValue(self, Entry, return_type = str, default = None, section = None, NoLog = False):
+
+    # ---------------------MyConfig::ReadValue-----------------------------------
+    def ReadValue(self, Entry, return_type=str, default=None, section=None, NoLog=False):
 
         try:
 
@@ -181,7 +195,7 @@ class MyConfig (MyLog):
                 elif return_type == int:
                     if self.config.get(self.Section, Entry) == 'None':
                         return None
-                    else:             
+                    else:
                         return self.config.getint(self.Section, Entry)
                 else:
                     self.LogErrorLine("Error in MyConfig:ReadValue: invalid type:" + str(return_type))
@@ -193,8 +207,7 @@ class MyConfig (MyLog):
                 self.LogErrorLine("Error in MyConfig:ReadValue: " + Entry + ": " + str(e1))
             return default
 
-
-    #---------------------MyConfig::WriteSection--------------------------------
+    # ---------------------MyConfig::WriteSection--------------------------------
     def WriteSection(self, SectionName):
 
         SectionList = self.GetSections()
@@ -215,8 +228,8 @@ class MyConfig (MyLog):
             self.LogErrorLine("Error in WriteSection: " + str(e1))
             return False
 
-    #---------------------MyConfig::WriteValue----------------------------------
-    def WriteValue(self, Entry, Value, remove = False, section = None):
+    # ---------------------MyConfig::WriteValue----------------------------------
+    def WriteValue(self, Entry, Value, remove=False, section=None):
 
         if section != None:
             self.SetSection(section)
@@ -225,40 +238,43 @@ class MyConfig (MyLog):
         try:
             with self.CriticalLock:
                 Found = False
-                ConfigFile = open(self.FileName,'r')
+                ConfigFile = open(self.FileName, 'r')
                 FileList = ConfigFile.read().splitlines()
                 ConfigFile.close()
-                
+
                 mySectionStart = -1;
                 mySectionEnd = -1;
-                myLine = -1; 
+                myLine = -1;
                 currentLastDataLine = -1;
                 for i, line in enumerate(FileList):
-                   if self.LineIsSection(line) and self.Section.lower() == self.GetSectionName(line).lower():
-                      mySectionStart = i
-                   elif mySectionStart >=0 and mySectionEnd == -1 and len(line.strip().split('=')) >= 2 and (line.strip().split('='))[0].strip() == Entry:
-                      myLine = i
-                   elif mySectionStart >=0 and mySectionEnd == -1 and self.LineIsSection(line):
-                      mySectionEnd = currentLastDataLine
+                    if self.LineIsSection(line) and self.Section.lower() == self.GetSectionName(line).lower():
+                        mySectionStart = i
+                    elif mySectionStart >= 0 and mySectionEnd == -1 and len(line.strip().split('=')) >= 2 and \
+                            (line.strip().split('='))[0].strip() == Entry:
+                        myLine = i
+                    elif mySectionStart >= 0 and mySectionEnd == -1 and self.LineIsSection(line):
+                        mySectionEnd = currentLastDataLine
 
-                   if not line.isspace() and not len(line.strip()) == 0 and not line.strip()[0] == "#":
-                      currentLastDataLine = i
-                if mySectionStart >=0 and mySectionEnd == -1:
-                    mySectionEnd = currentLastDataLine    
+                    if not line.isspace() and not len(line.strip()) == 0 and not line.strip()[0] == "#":
+                        currentLastDataLine = i
+                if mySectionStart >= 0 and mySectionEnd == -1:
+                    mySectionEnd = currentLastDataLine
 
-                self.LogDebug("CONFIG FILE WRITE ->> mySectionStart = "+str(mySectionStart)+", mySectionEnd = "+str(mySectionEnd)+", myLine = "+str(myLine))
+                self.LogDebug(
+                    "CONFIG FILE WRITE ->> mySectionStart = " + str(mySectionStart) + ", mySectionEnd = " + str(
+                        mySectionEnd) + ", myLine = " + str(myLine))
                 if mySectionStart == -1:
-                    raise Exception("NOT ABLE TO FIND SECTION:"+self.Section)
+                    raise Exception("NOT ABLE TO FIND SECTION:" + self.Section)
 
-                ConfigFile = open(self.FileName,'w')
+                ConfigFile = open(self.FileName, 'w')
                 for i, line in enumerate(FileList):
-                    if myLine >= 0 and myLine == i and not remove:      # I found my line, now write new value
-                       ConfigFile.write(Entry + " = " + Value + "\n")
-                    elif myLine == -1 and mySectionEnd == i:            # Here we have to insert the new record...
-                       ConfigFile.write(line+"\n")
-                       ConfigFile.write(Entry + " = " + Value + "\n")
-                    else:                                               # Nothing special, just copy the previous line....
-                       ConfigFile.write(line+"\n")
+                    if myLine >= 0 and myLine == i and not remove:  # I found my line, now write new value
+                        ConfigFile.write(Entry + " = " + Value + "\n")
+                    elif myLine == -1 and mySectionEnd == i:  # Here we have to insert the new record...
+                        ConfigFile.write(line + "\n")
+                        ConfigFile.write(Entry + " = " + Value + "\n")
+                    else:  # Nothing special, just copy the previous line....
+                        ConfigFile.write(line + "\n")
 
                 ConfigFile.flush()
                 ConfigFile.close()
@@ -270,19 +286,20 @@ class MyConfig (MyLog):
             self.LogError("Error in WriteValue: " + str(e1))
             return False
 
-    #---------------------MyConfig::GetSectionName------------------------------
+    # ---------------------MyConfig::GetSectionName------------------------------
     def GetSectionName(self, Line):
 
         Line = Line.strip()
-        if Line.startswith("[") and Line.endswith("]") and len(Line) >=3 :
+        if Line.startswith("[") and Line.endswith("]") and len(Line) >= 3:
             Line = Line.replace("[", "")
             Line = Line.replace("]", "")
             return Line
         return ""
-    #---------------------MyConfig::LineIsSection-------------------------------
+
+    # ---------------------MyConfig::LineIsSection-------------------------------
     def LineIsSection(self, Line):
 
         Line = Line.strip()
-        if Line.startswith("[") and Line.endswith("]") and len(Line) >=3 :
+        if Line.startswith("[") and Line.endswith("]") and len(Line) >= 3:
             return True
         return False

@@ -31,19 +31,20 @@ class DeviceHandler(DebounceHandler, MyLog):
     """Publishes the on/off state requested,
        and the IP address of the Echo making the request.
     """
+
     def __init__(self, log=None, shutter=None, config=None):
         self.log = log
         self.shutter = shutter
         self.config = config
         super(DeviceHandler, self).__init__()
-    
+
     def act(self, client_address, state, name):
         self.LogInfo("--> State " + str(state) + " on " + name + " from client @ " + client_address)
         shutterId = self.config.ShuttersByName[name]
         if state:
-           self.shutter.lower(shutterId)
+            self.shutter.lower(shutterId)
         else:
-           self.shutter.rise(shutterId)
+            self.shutter.rise(shutterId)
         return True
 
 
@@ -52,7 +53,7 @@ class Alexa(threading.Thread, MyLog, DebounceHandler):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None):
         threading.Thread.__init__(self, group=group, target=target, name="Alexa")
         self.shutdown_flag = threading.Event()
-        
+
         self.args = args
         self.kwargs = kwargs
         if kwargs["log"] != None:
@@ -61,20 +62,20 @@ class Alexa(threading.Thread, MyLog, DebounceHandler):
             self.shutter = kwargs["shutter"]
         if kwargs["config"] != None:
             self.config = kwargs["config"]
-        
+
         # Startup the fauxmo server
-        self.poller = fauxmo.Poller(log = self.log)
-        self.upnp_responder = fauxmo.UpnpBroadcastResponder(log = self.log)
+        self.poller = fauxmo.Poller(log=self.log)
+        self.upnp_responder = fauxmo.UpnpBroadcastResponder(log=self.log)
         self.upnp_responder.init_socket()
         self.poller.add(self.upnp_responder)
 
         # Register the device callback as a fauxmo handler
         dbh = DeviceHandler(log=self.log, shutter=self.shutter, config=self.config)
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
-            portId = 50000 + (abs(int(shutterId,16)) % 10000)
-            self.LogInfo ("Remote address in dec: " + str(int(shutterId,16)) + ", WeMo port will be n°" + str(portId))
+            portId = 50000 + (abs(int(shutterId, 16)) % 10000)
+            self.LogInfo("Remote address in dec: " + str(int(shutterId, 16)) + ", WeMo port will be n°" + str(portId))
             fauxmo.Fauxmo(shutter, self.upnp_responder, self.poller, None, portId, dbh, log=self.log)
-                        
+
         return
 
     def run(self):
@@ -88,14 +89,12 @@ class Alexa(threading.Thread, MyLog, DebounceHandler):
                 time.sleep(0.01)
             except Exception as e:
                 error += 1
-                self.LogInfo("Critical exception n°" + str(error) + ": "+ str(e.args))
+                self.LogInfo("Critical exception n°" + str(error) + ": " + str(e.args))
                 print("Trying not to shut down Alexa")
-                time.sleep(0.5) #Wait half a second when an exception occurs
-#                if(error > 5):
-#                    self.LogError("Sixth critical error:" + str(e.args))
-#                    break
-            
+                time.sleep(0.5)  # Wait half a second when an exception occurs
+        #                if(error > 5):
+        #                    self.LogError("Sixth critical error:" + str(e.args))
+        #                    break
+
         self.LogError("Received Signal to shut down Alexa thread")
         return
-
- 

@@ -5,7 +5,7 @@ try:
     from flask import Flask, render_template, request, Response, jsonify, json
 except Exception as e1:
     print(
-        "\n\nThis program requires the Flask library. Please see the project documentation at https://github.com/jgyates/genmon.\n")
+        "\n\nThis program requires the Flask library. Please see the project documentation at https://github.com/Nickduino/Pi-Somfy.\n")
     print("Error: " + str(e1))
     sys.exit(2)
 
@@ -84,7 +84,7 @@ class FlaskAppWrapper(MyLog):
             # self.LogDebug("JSON: "+str(request.get_json()))
             # self.LogDebug("RAW: "+str(request.get_data()))
             command = args[1]['command']
-            if command in ["up", "down", "stop", "program", "getConfig", "addSchedule", "editSchedule",
+            if command in ["up", "down", "stop", "program", "press", "getConfig", "addSchedule", "editSchedule",
                            "deleteSchedule", "addShutter", "editShutter", "deleteShutter", "setLocation"]:
                 self.LogInfo("processing Command \"" + command + "\" with parameters: " + str(request.values))
                 result = getattr(self, command)(request.values)
@@ -159,6 +159,17 @@ class FlaskAppWrapper(MyLog):
         self.shutter.program(shutter)
         return {'status': 'OK'}
 
+    def press(self, params):
+        shutter = params.get('shutter', 0, type=str)
+        buttons = params.get('buttons', 0, type=int)
+        longPress = params.get('longPress', 0, type=str) == "true"
+        self.LogDebug(
+            ("long" if longPress else "short") + " press buttons: \"" + str(buttons) + "\" shutter \"" + shutter + "\"")
+        if (not shutter in self.config.Shutters):
+            return {'status': 'ERROR', 'message': 'Shutter does not exist'}
+        self.shutter.pressButtons(shutter, buttons, longPress)
+        return {'status': 'OK'}
+
     def setLocation(self, params):
         self.LogDebug("set Location: " + params.get('lat', 0, type=str) + " / " + params.get('lng', 0, type=str))
         self.config.setLocation(params.get('lat', 0, type=str), params.get('lng', 0, type=str))
@@ -198,7 +209,8 @@ class FlaskAppWrapper(MyLog):
             self.config.WriteValue(str(id), str(code), section="ShutterRollingCodes");
             self.config.WriteValue(str(id), str(None), section="ShutterIntermediatePositions");
             self.config.ShuttersByName[name] = id
-            self.config.Shutters[id] = {'name': name, 'code': code, 'duration': duration, 'intermediatePosition': None}
+            self.config.Shutters[id] = {'name': name, 'code': code, 'duration': duration, 'durationDown': int(duration),
+                                        'durationUp': int(duration), 'intermediatePosition': None}
             return {'status': 'OK', 'id': id}
 
     def editShutter(self, params):
@@ -263,7 +275,7 @@ class FlaskAppWrapper(MyLog):
         durations = {}
         for k in self.config.Shutters:
             shutters[k] = self.config.Shutters[k]['name']
-            durations[k] = self.config.Shutters[k]['duration']
+            durations[k] = self.config.Shutters[k]['durationDown']
         obj = {'Latitude': self.config.Latitude, 'Longitude': self.config.Longitude, 'Shutters': shutters,
                'ShutterDurations': durations, 'Schedule': self.schedule.getScheduleAsDict()}
         self.LogDebug("getConfig called, sending: " + json.dumps(obj))

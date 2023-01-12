@@ -165,7 +165,7 @@ class Shutter(MyLog):
         setupDuration = self.config.Shutters[shutterId]['duration']
 
         fallback = False
-        if 0 < secondsSinceLastCommand < setupDuration:
+        if secondsSinceLastCommand > 0 and secondsSinceLastCommand < setupDuration:
             durationPercentage = int(round(secondsSinceLastCommand / setupDuration * 100))
             self.LogDebug(
                 "[" + shutterId + "] Duration percentage: " + str(durationPercentage) + ", State position: " + str(
@@ -521,21 +521,21 @@ class operateShutters(MyLog):
 
     # --------------------- operateShutters::ProcessCommand -----------------------------------------------
     def ProcessCommand(self, args):
-        if (args.shutterName != "") and (args.down == True):
+        if ((args.shutterName != "") and (args.down == True)):
             self.shutter.lower(self.config.ShuttersByName[args.shutterName])
-        elif (args.shutterName != "") and (args.up == True):
+        elif ((args.shutterName != "") and (args.up == True)):
             self.shutter.rise(self.config.ShuttersByName[args.shutterName])
-        elif (args.shutterName != "") and (args.stop == True):
+        elif ((args.shutterName != "") and (args.stop == True)):
             self.shutter.stop(self.config.ShuttersByName[args.shutterName])
-        elif (args.shutterName != "") and (args.program == True):
+        elif ((args.shutterName != "") and (args.program == True)):
             self.shutter.program(self.config.ShuttersByName[args.shutterName])
-        elif (args.shutterName != "") and (args.demo == True):
+        elif ((args.shutterName != "") and (args.demo == True)):
             self.LogInfo("lowering shutter for 7 seconds")
             self.shutter.lowerPartial(self.config.ShuttersByName[args.shutterName], 7)
             time.sleep(7)
             self.LogInfo("rise shutter for 7 seconds")
             self.shutter.risePartial(self.config.ShuttersByName[args.shutterName], 7)
-        elif (args.shutterName != "") and (args.duskdawn is not None):
+        elif ((args.shutterName != "") and (args.duskdawn is not None)):
             self.schedule.addRepeatEventBySunrise([self.config.ShuttersByName[args.shutterName]], 'up',
                                                   args.duskdawn[1], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
             self.schedule.addRepeatEventBySunset([self.config.ShuttersByName[args.shutterName]], 'down',
@@ -585,41 +585,41 @@ class operateShutters(MyLog):
         self.LogInfo("Process Command Completed....")
         self.Close();
 
-    # ---------------------operateShutters::Close----------------------------------------
-    def Close(self, signum=None, frame=None):
 
-        # we dont really care about the errors that may be generated on shutdown
-        try:
-            self.IsStopping = True
-        except Exception as e1:
-            self.LogErrorLine("Error Closing Monitor: " + str(e1))
+# ---------------------operateShutters::Close----------------------------------------
+def Close(self, signum=None, frame=None):
+    # we dont really care about the errors that may be generated on shutdown
+    try:
+        self.IsStopping = True
+    except Exception as e1:
+        self.LogErrorLine("Error Closing Monitor: " + str(e1))
 
-        self.LogError("operateShutters Shutdown")
+    self.LogError("operateShutters Shutdown")
 
-        try:
-            self.ProgramComplete = True
-            if self.scheduler is not None:
-                self.LogError("Stopping Scheduler. This can take up to 1 second...")
-                self.scheduler.shutdown_flag.set()
-                self.scheduler.join()
-                self.LogError("Scheduler stopped. Now exiting.")
-            if self.alexa is not None:
-                self.LogError("Stopping Alexa Listener. This can take up to 1 second...")
-                self.alexa.shutdown_flag.set()
-                self.alexa.join()
-                self.LogError("Alexa Listener stopped. Now exiting.")
-            if self.mqtt is not None:
-                self.LogError("Stopping MQTT Listener. This can take up to 1 second...")
-                self.mqtt.shutdown_flag.set()
-                self.mqtt.join()
-                self.LogError("MQTT Listener stopped. Now exiting.")
-            if self.webServer is not None:
-                self.LogError("Stopping WebServer. This can take up to 1 second...")
-                self.webServer.shutdown_server()
-                self.LogError("WebServer stopped. Now exiting.")
-            sys.exit(0)
-        except:
-            pass
+    try:
+        self.ProgramComplete = True
+        if self.scheduler is not None:
+            self.LogError("Stopping Scheduler. This can take up to 1 second...")
+            self.scheduler.shutdown_flag.set()
+            self.scheduler.join()
+            self.LogError("Scheduler stopped. Now exiting.")
+        if self.alexa is not None:
+            self.LogError("Stopping Alexa Listener. This can take up to 1 second...")
+            self.alexa.shutdown_flag.set()
+            self.alexa.join()
+            self.LogError("Alexa Listener stopped. Now exiting.")
+        if self.mqtt is not None:
+            self.LogError("Stopping MQTT Listener. This can take up to 1 second...")
+            self.mqtt.shutdown_flag.set()
+            self.mqtt.join()
+            self.LogError("MQTT Listener stopped. Now exiting.")
+        if self.webServer is not None:
+            self.LogError("Stopping WebServer. This can take up to 1 second...")
+            self.webServer.shutdown_server()
+            self.LogError("WebServer stopped. Now exiting.")
+        sys.exit(0)
+    except:
+        pass
 
 
 # ------------------- Command-line interface for monitor ------------------------

@@ -62,7 +62,8 @@ class Event:
 
         # if not ((isinstance(shutterAction, str)) and ((shutterAction.startswith("up") or shutterAction.startswith("down")))):
         if not (
-        (shutterAction.startswith("up") or shutterAction.startswith("down") or shutterAction.startswith("stop"))):
+                (shutterAction.startswith("up") or shutterAction.startswith("down") or shutterAction.startswith(
+                    "stop"))):
             raise ValueError("%s is not a valid value for ACTION." % shutterAction)
         self.shutterAction = shutterAction
 
@@ -241,9 +242,9 @@ class Schedule(MyLog):
 
     def printSchedule(self):
         for id, evt in self.schedule.items():
-            print ("")
-            print ("Event: " + str(id))
-            print (evt.prettyprint())
+            print("")
+            print("Event: " + str(id))
+            print(evt.prettyprint())
 
     def getSchedule(self):
         return self.schedule

@@ -4,6 +4,13 @@ var mymap;
 var marker;
 var config;
 var modalCallerIconElement;
+var configShutter;
+
+const buttonStop = 0x1;
+const buttonUp = 0x2;
+const buttonDown = 0x4;
+const buttonProg = 0x8;
+
 
 GetStartupInfo(true);
 $(document).ready(function() {
@@ -208,6 +215,21 @@ function programShutter(id) {
                       BootstrapDialog.show({type: BootstrapDialog.TYPE_DANGER, title: 'Error', message:'Received Error from Server: '+result.message, onhide: function(){GetStartupInfo(false);}});
                    }
                }, "json");
+}
+
+function pressButtons(id, buttons, longPress, confirmMessage) {
+   var url = baseurl.concat("press");
+   $.post(url,
+      {shutter: id, buttons: buttons, longPress: longPress },
+      function(result, status){
+         if ((status=="success") && (result.status == "OK")) {
+            if(confirmMessage != null) {
+               BootstrapDialog.show({type: BootstrapDialog.TYPE_INFO, title: 'Information', message:confirmMessage});
+            }
+         } else {
+            BootstrapDialog.show({type: BootstrapDialog.TYPE_DANGER, title: 'Error', message:'Received Error from Server: '+result.message, onhide: function(){GetStartupInfo(false);}});
+         }
+     }, "json");
 }
 
 function deleteShutter(id) {
@@ -705,6 +727,12 @@ function setupListeners() {
         programShutter($(this).parents("tr").attr('name'));
     });
 
+    // Edit row on configure button click
+    $(document).on("click", ".configureShutters", function(){
+       configShutter = $(this).parents("tr").attr('name');
+       $('#configure-shutter').modal('show');
+    });
+
     // Edit row on edit button click
     $(document).on("click", ".editSchedule", function(){		
         $(this).parents("tr").find('.editbox').toggle();
@@ -768,6 +796,47 @@ function setupListeners() {
         $('#program-new-shutter').modal('hide');
         // The hide.bs.modal event will take care of refreshing the main window
     });
+
+    $(document).on("click", '.press-button-up-short', function(){
+        //  Fine adjustment of blind up
+        pressButtons(configShutter, buttonUp, false);
+    });
+
+    $(document).on("click", '.press-button-down-short', function(){
+        //  Fine adjustment of blind down
+        pressButtons(configShutter, buttonDown, false);
+    });
+    
+    $(document).on("click", '.press-button-stop-short', function(){
+        // Stops blind when it's in motion, or moves to the My position.
+        pressButtons(configShutter, buttonStop, false);
+    });
+
+    $(document).on("click", '.press-button-up-down-long', function(){
+        // Used in new installation setup, or when entering blind limit configuration mode
+        pressButtons(configShutter, buttonUp | buttonDown, true, "The blind should have jogged. If not, try again.");
+    });
+
+    $(document).on("click", '.press-button-up-stop-short', function(){
+      // Used to set a My position, to reverse the direction of blinds during initial setup, and to confirm limit position settings.
+     pressButtons(configShutter, buttonUp | buttonStop, false, "The blind should have started moving up. If not, try again.");
+    });
+
+    $(document).on("click", '.press-button-down-stop-short', function(){
+      // Used to set a My position, to reverse the direction of blinds during initial setup, and to confirm limit position settings.
+     pressButtons(configShutter, buttonDown | buttonStop, false, "The blind should have started moving down. If not, try again.");
+    });
+
+    $(document).on("click", '.press-button-stop-long', function(){
+      // Used to set a My position, to reverse the direction of blinds during initial setup, and to confirm limit position settings.
+     pressButtons(configShutter, buttonStop, true, "The blind should have jogged. If not, try again.");
+  });
+
+  $(document).on("click", '.press-button-prog-long', function(){
+      // Used to end programming, or to switch a blind into Remote Learning mode
+     pressButtons(configShutter, buttonProg, true);
+  });
+ 
 
     // Shutter Commands
     $(document).on("click", ".up", function(){		
