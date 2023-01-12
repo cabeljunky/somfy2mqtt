@@ -124,6 +124,9 @@ You have 6 ways to operate. The recommended operation mode is mode 5. But the ot
     -down, -d                               lower the shutter
     -stop, -s                               Stop the shutter
     -program, -p                            Send a program signal
+    -press BTN [BTN...]                     Simulate a chord press of a the specified remote buttons
+                                            ('up', 'down', 'stop'/'my', and 'program')
+    -long                                   When used with the -press option, simulates a long press
     -demo                                   lower the shutter, stop after 7 second then raise the shutter
     -duskdawn DUSKDAWN DUSKDAWN, -dd DUSKDAWN DUSKDAWN
                                             Automatically lower the shutter at sunset and rise the
@@ -133,6 +136,7 @@ You have 6 ways to operate. The recommended operation mode is mode 5. But the ot
                                             which can be used to setup the schedule.
     -echo, -e                               Enable Amazon Alexa (Echo) integration
     -mqtt, -m                               Enable MQTT integration
+
 
 
 **Examples:**
@@ -215,7 +219,7 @@ First time you use the Web GUI, it's important that you follow these 3 steps:
 1. Set up your location. This is required to correctly determine the time of sunrise and sunset. To do so, navigate to the top menu item "Settings". Use the map to pinpoint your location. You can also use the search functionality on the left-hand side (magnifier icon) and type your address. Press "Save"
 
 1. You will need to set up your shutters and program your remote control. To do so, select the second menu item "Add/Remove Shutters". <br/>![Screenshot](documentation/p1.png)<br/>
-Click the "Add" button, select the name for your shutter (this is also the name that the Amazon Alexa app will use later) and click on the "save" icon. Then follow the on-screen instructions for programming your shutter.
+Click the "Add" button, select the name for your shutter (this is also the name that the Amazon Alexa app will use later) and click on the "save" icon. Then follow the on-screen instructions for programming your shutter. For installing shutters from the factory default configuration, use the Configure button.
 
 1. Next, make sure your shutters work. The easiest way to verify is to use the "Manual Operations" menu. <br/>![Screenshot](documentation/p2.png)<br/> You can rise and lower your shutters by clicking on the relevant icons.
 
