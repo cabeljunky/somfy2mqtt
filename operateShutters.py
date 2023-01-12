@@ -54,12 +54,12 @@ class Shutter(MyLog):
     def __init__(self, log=None, config=None):
         super(Shutter, self).__init__()
         self.lock = threading.Lock()
-        if log != None:
+        if log is not None:
             self.log = log
-        if config != None:
+        if config is not None:
             self.config = config
 
-        if self.config.TXGPIO != None:
+        if self.config.TXGPIO is not None:
             self.TXGPIO = self.config.TXGPIO  # 433.42 MHz emitter
         else:
             self.TXGPIO = 4  # 433.42 MHz emitter on GPIO 4
@@ -187,7 +187,7 @@ class Shutter(MyLog):
             self.LogWarn("[" + shutterId + "] Too much time since last command.")
             fallback = True
 
-        if fallback == True:  # Let's assume it will end on the intermediate position ! If it exists !
+        if fallback:  # Let's assume it will end on the intermediate position ! If it exists !
             intermediatePosition = self.config.Shutters[shutterId]['intermediatePosition']
             if (intermediatePosition == None) or (intermediatePosition == state.position):
                 self.LogInfo("[" + shutterId + "] Stay stationary.")
@@ -410,9 +410,9 @@ class operateShutters(MyLog):
             self.LogWarn("operateShutters.py is already loaded.")
             sys.exit(1)
 
-        if not self.startPIGPIO():
-            self.LogConsole("Not able to start PIGPIO")
-            sys.exit(1)
+        # if not self.startPIGPIO():
+        #    self.LogConsole("Not able to start PIGPIO")
+        #    sys.exit(1)
 
         self.shutter = Shutter(log=self.log, config=self.config)
 
@@ -544,23 +544,23 @@ class operateShutters(MyLog):
                 kwargs={'log': self.log, 'schedule': self.schedule, 'shutter': self.shutter, 'config': self.config})
             self.scheduler.setDaemon(True)
             self.scheduler.start()
-            if (args.echo == True):
+            if args.echo:
                 self.alexa.setDaemon(True)
                 self.alexa.start()
-            if (args.mqtt == True):
+            if args.mqtt:
                 self.mqtt.setDaemon(True)
                 self.mqtt.start()
             self.scheduler.join()
-        elif (args.auto == True):
+        elif args.auto:
             self.schedule.loadScheudleFromConfig()
             self.scheduler = Scheduler(
                 kwargs={'log': self.log, 'schedule': self.schedule, 'shutter': self.shutter, 'config': self.config})
             self.scheduler.setDaemon(True)
             self.scheduler.start()
-            if (args.echo == True):
+            if args.echo:
                 self.alexa.setDaemon(True)
                 self.alexa.start()
-            if (args.mqtt == True):
+            if args.mqtt:
                 self.mqtt.setDaemon(True)
                 self.mqtt.start()
             self.webServer = FlaskAppWrapper(name='WebServer',
