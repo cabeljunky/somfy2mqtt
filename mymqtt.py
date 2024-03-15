@@ -26,7 +26,7 @@ except Exception as e1:
     sys.exit(2)
 
 
-class DiscoveryMsg:
+class DiscoveryMsg():
     DISCOVERY_MSG = {"name": "",
                      "command_topic": "%s/%s/level/cmd",
                      "position_topic": "%s/%s/level/set_state",
@@ -43,16 +43,15 @@ class DiscoveryMsg:
                                 }
                      }
 
-    def __init__(self, shutter, shutter_id, topic):
+    def __init__(self, shutter, shutterId):
         self.discovery_msg = deepcopy(DiscoveryMsg.DISCOVERY_MSG)
         self.discovery_msg["name"] = shutter
         self.discovery_msg["command_topic"] = DiscoveryMsg.DISCOVERY_MSG["command_topic"] % (topic, shutter_id)
         self.discovery_msg["position_topic"] = DiscoveryMsg.DISCOVERY_MSG["position_topic"] % (topic, shutter_id)
-        self.discovery_msg["set_position_topic"] = DiscoveryMsg.DISCOVERY_MSG["set_position_topic"] % (
-        topic, shutter_id)
-        self.discovery_msg["unique_id"] = shutter_id
+        self.discovery_msg["set_position_topic"] = DiscoveryMsg.DISCOVERY_MSG["set_position_topic"] % (topic, shutter_id)
+        self.discovery_msg["unique_id"] = shutterId
         self.discovery_msg["device"]["name"] = shutter
-        self.discovery_msg["device"]["identifiers"] = shutter_id
+        self.discovery_msg["device"]["identifiers"] = shutterId
 
     def __str__(self):
         return json.dumps(self.discovery_msg)
@@ -82,19 +81,11 @@ class MQTT(threading.Thread, MyLog):
         try:
             msg = str(message.payload.decode("utf-8"))
             topic = message.topic
-            self.LogInfo("message received from MQTT: " + topic + " = " + msg)
-
-            data = topic.split("/")
-            if data[0] == self.config.MQTT_DiscoveryTopic and data[1] == "status":
-                self.LogInfo("Home Assistant discovery service status: " + str(msg))
-                if msg == "online":
-                    self.LogInfo("Reregistration of the service")
-                    self.sendStartupInfo()
-                return
+            self.LogInfo("message received from MQTT: "+topic+" = "+msg)
 
             [prefix, shutterId, property, command] = topic.split("/")
-            if command == "cmd":
-                self.LogInfo("sending message: " + str(msg))
+            if (command == "cmd"):
+                self.LogInfo("sending message: "+str(msg))
                 if msg == "STOP":
                     self.shutter.stop(shutterId)
                 elif int(msg) == 0:
@@ -117,62 +108,56 @@ class MQTT(threading.Thread, MyLog):
 
     def sendMQTT(self, topic, msg):
         self.LogInfo("sending message to MQTT: " + topic + " = " + msg)
-        self.t.publish(topic, msg, retain=True)
+        self.t.publish(topic,msg,retain=True)
 
     def sendStartupInfo(self):
         for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
-            self.LogInfo(
-                "Registration of component " + shutterId + " " + str(self.config.MQTT_DiscoveryTopic) + " " + str(
-                    self.config.MQTT_Topic))
-            self.sendMQTT(str(self.config.MQTT_DiscoveryTopic) + "/cover/" + shutterId + "/config",
-                          str(DiscoveryMsg(shutter, shutterId, str(self.config.MQTT_Topic))))
+            self.sendMQTT("homeassistant/cover/"+shutterId+"/config", str(DiscoveryMsg(shutter, shutterId)))
 
     def on_connect(self, client, userdata, flags, rc):
-        if rc == 0:
-            self.LogInfo("Connected to MQTT with result code " + str(rc))
+        if rc==0:
+            self.LogInfo("Connected to MQTT with result code "+str(rc))
             self.connected_flag = True
             for shutter, shutterId in sorted(self.config.ShuttersByName.items(), key=lambda kv: kv[1]):
-                self.LogInfo("Subscribe to shutter: " + shutter)
-                self.t.subscribe(str(self.config.MQTT_Topic) + "/" + shutterId + "/level/cmd")
-            if self.config.EnableDiscovery is True:
+                self.LogInfo("Subscribe to shutter: "+shutter)
+                self.t.subscribe(str(self.config.MQTT_Topic) + "/"+shutterId+"/level/cmd")
+            if self.config.EnableDiscovery == True:
                 self.LogInfo("Sending Home Assistant MQTT Discovery messages")
                 self.sendStartupInfo()
         else:
-            print("Bad connection Returned code= ", rc)
-            self.connected_flag = False
+            print("Bad connection Returned code= ",rc)
+            self.connected_flag=False
 
     def on_disconnect(self, client, userdata, rc=0):
-        self.connected_flag = False
+        self.connected_flag=False
         if rc != 0:
             self.LogInfo("Disconnected from MQTT Server. result code: " + str(rc))
-            # while not self.connected_flag: #wait in loop
+            #while not self.connected_flag: #wait in loop
             #    self.LogInfo("Waiting 30sec for reconnect")
             #    time.sleep(30)
             #    self.t.connect(self.config.MQTT_Server,self.config.MQTT_Port)
 
+            
     def set_state(self, shutterId, level):
-        self.LogInfo("Received request to set Shutter " + shutterId + " to " + str(level))
-        self.sendMQTT(str(self.config.MQTT_Topic) + "/" + shutterId + "/level/set_state", str(level))
-
+        self.LogInfo("Received request to set Shutter "+shutterId+" to "+str(level))
+        self.sendMQTT(str(self.config.MQTT_Topic) + "/"+shutterId+"/level/set_state", str(level))
+            
     def run(self):
         self.connected_flag = False
         self.LogInfo("Entering MQTT polling loop")
 
         # Setup the mqtt client
         self.t = paho.Client(client_id=self.config.MQTT_ClientID)
-        # set username and password
-        if not ((self.config.MQTT_User.strip() == "") and (self.config.MQTT_Password.strip() == "")):
-            self.LogInfo("Using username '" + self.config.MQTT_User + "' and password for authentication")
-            self.t.username_pw_set(username=self.config.MQTT_User, password=self.config.MQTT_Password)
+        if not (self.config.MQTT_Password.strip() == ""):
+           self.t.username_pw_set(username=self.config.MQTT_User,password=self.config.MQTT_Password)
         # set the ssl options
-
         if not ((self.config.MQTT_Cert.strip() == "") and (self.config.MQTT_Key.strip() == "")):
             self.LogInfo("Enabling the MQTT SSL/TLS")
             self.t.tls_set(ca_certs=self.config.MQTT_CA, certfile=self.config.MQTT_Cert,
                            keyfile=self.config.MQTT_Key, cert_reqs=ssl.CERT_REQUIRED,
                            tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=self.config.MQTT_AllowedCiphers)
             self.t.tls_insecure_set(self.config.MQTT_VerifyCertificate)
-
+            
         self.t.on_connect = self.on_connect
         self.t.on_message = self.receiveMessageFromMQTT
         self.t.on_disconnect = self.on_disconnect
@@ -183,31 +168,33 @@ class MQTT(threading.Thread, MyLog):
         while not self.shutdown_flag.is_set():
             # Loop until the server is available
             try:
-                self.LogInfo("Connecting to MQTT server: " + self.config.MQTT_Server + ":" + str(self.config.MQTT_Port))
-                self.t.connect(self.config.MQTT_Server, self.config.MQTT_Port)
+                self.LogInfo("Connecting to MQTT server")
+                self.t.connect(self.config.MQTT_Server,self.config.MQTT_Port)
                 time.sleep(10)
-                if self.config.EnableDiscovery:
-                    self.sendStartupInfo()
+                # if self.config.EnableDiscovery == True:
+                #     self.sendStartupInfo()
                 break
             except Exception as e:
                 error += 1
-                self.LogInfo("Exception in MQTT connect " + str(error) + ": " + str(e.args))
+                self.LogInfo("Exception in MQTT connect " + str(error) + ": "+ str(e.args))
 
         error = 0
         while not self.shutdown_flag.is_set():
             # Loop and poll for incoming requests
             try:
-                # NOTE: Timeout value must be smaller than MQTT keep_alive (which is 60s by default)
+                #NOTE: Timeout value must be smaller than MQTT keep_alive (which is 60s by default)
                 self.t.loop(timeout=30)
                 # self.t.loop_start()
-                if self.connected_flag is False:
+                if self.connected_flag == False:
                     self.LogInfo("Re-Connecting to MQTT server")
-                    self.t.connect(self.config.MQTT_Server, self.config.MQTT_Port)
+                    self.t.connect(self.config.MQTT_Server,self.config.MQTT_Port)
                     time.sleep(10)
             except Exception as e:
                 error += 1
-                self.LogInfo("Critical exception " + str(error) + ": " + str(e.args))
-                time.sleep(0.5)  # Wait half a second when an exception occurs
+                self.LogInfo("Critical exception " + str(error) + ": "+ str(e.args))
+                time.sleep(0.5) #Wait half a second when an exception occurs
 
         self.LogError("Received Signal to shut down MQTT thread")
         return
+
+ 
