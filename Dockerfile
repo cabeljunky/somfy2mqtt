@@ -1,5 +1,5 @@
 # The first lines of your Dockerfile should always be:
-FROM python:3-slim-bullseye AS builder
+FROM python:3-slim-bookworm AS builder
 
 ENV version 79
 
@@ -12,10 +12,10 @@ RUN apt-get update && \
     make && \
     make install
 
-FROM python:3-slim-bullseye
+FROM python:3-slim-bookworm
 RUN mkdir -p /opt/somfy/log  && \
     mkdir -p /opt/somfy/config && \
-    apt-get update && \ 
+    apt-get update && \
     apt-get install --no-install-recommends -y python3-pigpio pigpio-tools python3-paho-mqtt python3-requests python3-ephem python3-flask python3-iniparse && \
     apt-get clean
 
